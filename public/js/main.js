@@ -35,13 +35,13 @@ function createVehicleCard(vehicle) {
     const card = document.createElement('div');
     card.className = 'car-card';
     card.innerHTML = 
-        <img src="${vehicle.fotos[0] || '/images/no-image.jpg'}" alt="${vehicle.marca} ">
+        <img src="\" alt="\ \">
         <div class="car-info">
-            <h3>${vehicle.marca} </h3>
-            <p>Ano: ${vehicle.anoFabricacao}</p>
-            <p>Km: ${vehicle.quilometragem.toLocaleString()}</p>
-            <p class="price">R$ ${vehicle.preco.toLocaleString()}</p>
-            <a href="/veiculo/${vehicle._id}" class="view-details">Ver Detalhes</a>
+            <h3>\ \</h3>
+            <p>Ano: \</p>
+            <p>Km: \</p>
+            <p class="price">R$ \</p>
+            <a href="/veiculo/\" class="view-details">Ver Detalhes</a>
         </div>
     ;
     return card;
