@@ -19,6 +19,11 @@ app.use('/api', apiRoutes);
 // Servir arquivos estÃ¡ticos
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Rota para pÃ¡gina de detalhes do veÃ­culo
+app.get('/veiculo/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'veiculo.html'));
+});
+
 // Rota principal - sempre retorna o index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -34,7 +39,4 @@ mongoose.connect(mongoURI)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
-}); // Rota para página de detalhes do veículo
-app.get('/veiculo/:id', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'veiculo.html'));
 });
