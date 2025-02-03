@@ -1,0 +1,23 @@
+name: Deploy to DigitalOcean
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Digital Ocean
+        uses: appleboy/ssh-action@master
+        with:
+          host: 167.172.139.129
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /var/www/luizautomoveis
+            git config --global --add safe.directory /var/www/luizautomoveis
+            git pull
+            npm install
+            pm2 restart luizautomoveis 
