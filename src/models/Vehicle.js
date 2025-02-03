@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const vehicleSchema = new mongoose.Schema({
     marca: {
         type: String,
-        required: true,
-        enum: ['Fiat', 'Chevrolet', 'Volkswagen', 'Ford', 'Toyota', 'Honda', 'Hyundai', 'Renault', 'Nissan', 'Jeep']
+        required: true
     },
     modelo: {
         type: String,
@@ -17,9 +16,7 @@ const vehicleSchema = new mongoose.Schema({
     },
     anoFabricacao: {
         type: Number,
-        required: true,
-        min: 1960,
-        max: new Date().getFullYear() + 1
+        required: true
     },
     finalPlaca: {
         type: Number,
@@ -29,8 +26,7 @@ const vehicleSchema = new mongoose.Schema({
     },
     quilometragem: {
         type: Number,
-        required: true,
-        min: 0
+        required: true
     },
     combustivel: {
         type: String,
@@ -43,8 +39,7 @@ const vehicleSchema = new mongoose.Schema({
         enum: ['Manual', 'Automático', 'CVT', 'Semi-automático']
     },
     fotos: [{
-        type: String,
-        required: true
+        type: String
     }],
     preco: {
         type: Number,

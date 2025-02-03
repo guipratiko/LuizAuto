@@ -120,3 +120,90 @@ body {
 .admin-button:hover {
     background-color: var(--primary-color);
 } 
+/* Estilos para página de detalhes do veículo */
+.vehicle-details {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.vehicle-gallery {
+    position: relative;
+}
+
+.main-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.thumbnails {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.thumbnails img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.thumbnails img:hover {
+    opacity: 0.8;
+}
+
+.vehicle-info h1 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+.specs {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.specs p {
+    margin: 0.5rem 0;
+}
+
+.price h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin: 1rem 0;
+}
+
+.description {
+    margin: 1rem 0;
+}
+
+.whatsapp-button {
+    display: inline-block;
+    background: #25D366;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    transition: background 0.3s;
+}
+
+.whatsapp-button:hover {
+    background: #128C7E;
+}
+
+@media (max-width: 768px) {
+    .vehicle-details {
+        grid-template-columns: 1fr;
+    }
+}
