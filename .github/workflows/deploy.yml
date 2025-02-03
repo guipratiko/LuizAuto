@@ -7,9 +7,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Deploy to Digital Ocean
+        uses: appleboy/ssh-action@master
         with:
-          node-version: '16'
-      - run: npm install
-      - run: npm run build 
+          host: ${{ secrets.DROPLET_IP }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/luizautomoveis
+            git pull
+            npm install
+            pm2 restart luizautomoveis 
