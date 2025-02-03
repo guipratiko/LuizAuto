@@ -10,10 +10,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Configurar MIME types
+app.use((req, res, next) => {
+    if (req.path.endsWith('.js')) {
+        res.type('application/javascript');
+    }
+    if (req.path.endsWith('.css')) {
+        res.type('text/css');
+    }
+    if (req.path.endsWith('.svg')) {
+        res.type('image/svg+xml');
+    }
+    next();
+});
+
 // Importar rotas
 const apiRoutes = require('./src/routes/api');
 
-// Usar rotas - Note o /api antes
+// Usar rotas
 app.use('/api', apiRoutes);
 
 // Servir arquivos estáticos
@@ -24,7 +38,7 @@ app.get('/veiculo/:id', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'veiculo.html'));
 });
 
-// Rota principal - sempre retorna o index.html
+// Rota principal
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

@@ -35,13 +35,12 @@ function createVehicleCard(vehicle) {
     const card = document.createElement('div');
     card.className = 'car-card';
     
-    // Imagem principal com fallback
     const mainImage = vehicle.fotos && vehicle.fotos.length > 0 ? vehicle.fotos[0] : '/images/no-image.svg';
     
     card.innerHTML = `
         <img src="${mainImage}" 
              alt="${vehicle.marca} ${vehicle.modelo}"
-             onerror="this.src='/images/no-image.jpg'">
+             onerror="this.src='/images/no-image.svg'">
         <div class="car-info">
             <h3>${vehicle.marca} ${vehicle.modelo}</h3>
             <p>Ano: ${vehicle.anoFabricacao}</p>
