@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Carregar veículos
+    // Carregar veÃ­culos
     const carsContainer = document.getElementById('cars-container');
     if (carsContainer) {
         fetch('/api/vehicles')
             .then(response => response.json())
             .then(vehicles => {
                 if (vehicles.length === 0) {
-                    carsContainer.innerHTML = '<p class="no-cars">Nenhum veículo disponível no momento.</p>';
+                    carsContainer.innerHTML = '<p class="no-cars">Nenhum veÃ­culo disponÃ­vel no momento.</p>';
                     return;
                 }
                 vehicles.forEach(vehicle => {
@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             })
             .catch(error => {
-                console.error('Erro ao carregar veículos:', error);
-                carsContainer.innerHTML = '<p class="error">Erro ao carregar veículos. Tente novamente mais tarde.</p>';
+                console.error('Erro ao carregar veÃ­culos:', error);
+                carsContainer.innerHTML = '<p class="error">Erro ao carregar veÃ­culos. Tente novamente mais tarde.</p>';
             });
     }
 });
@@ -34,15 +34,21 @@ document.addEventListener('DOMContentLoaded', function() {
 function createVehicleCard(vehicle) {
     const card = document.createElement('div');
     card.className = 'car-card';
-    card.innerHTML = 
-        <img src="\" alt="\ \">
+    
+    // Imagem principal com fallback
+    const mainImage = vehicle.fotos && vehicle.fotos.length > 0 ? vehicle.fotos[0] : '/images/no-image.svg';
+    
+    card.innerHTML = `
+        <img src="${mainImage}" 
+             alt="${vehicle.marca} ${vehicle.modelo}"
+             onerror="this.src='/images/no-image.jpg'">
         <div class="car-info">
-            <h3>\ \</h3>
-            <p>Ano: \</p>
-            <p>Km: \</p>
-            <p class="price">R$ \</p>
-            <a href="/veiculo/\" class="view-details">Ver Detalhes</a>
+            <h3>${vehicle.marca} ${vehicle.modelo}</h3>
+            <p>Ano: ${vehicle.anoFabricacao}</p>
+            <p>Km: ${vehicle.quilometragem.toLocaleString()}</p>
+            <p class="price">R$ ${vehicle.preco.toLocaleString()}</p>
+            <a href="/veiculo/${vehicle._id}" class="view-details">Ver Detalhes</a>
         </div>
-    ;
+    `;
     return card;
 }
