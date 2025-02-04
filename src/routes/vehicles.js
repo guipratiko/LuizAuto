@@ -6,17 +6,26 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Configuração do Multer para upload de imagens
+// Configuração do Multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/vehicles')
+        const uploadDir = process.env.UPLOAD_DIR || 'public/uploads/vehicles';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname))
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 50 * 1024 * 1024 // 50MB
+    }
+});
 
 // Listar todos os veículos
 router.get('/', async (req, res) => {
