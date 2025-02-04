@@ -355,7 +355,7 @@ async function editVehicle(id) {
     }
 }
 
-function fillForm(vehicle) {
+async function fillForm(vehicle) {
     const form = document.getElementById('vehicle-form');
     Object.keys(vehicle).forEach(key => {
         const input = form.elements[key];
@@ -363,6 +363,84 @@ function fillForm(vehicle) {
     });
 
     uploadedPhotos = vehicle.fotos || [];
+    
+    // Limpar o input de fotos
+    document.getElementById('fotos').value = '';
+    
+    // Mostrar imagens existentes
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    imagePreviewContainer.innerHTML = '';
+    
+    if (vehicle.fotos && vehicle.fotos.length > 0) {
+        const existingImagesDiv = document.createElement('div');
+        existingImagesDiv.className = 'existing-images';
+        existingImagesDiv.innerHTML = '<h4>Imagens Atuais:</h4>';
+        
+        vehicle.fotos.forEach((foto, index) => {
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'image-container';
+            
+            const img = document.createElement('img');
+            img.src = foto;
+            img.className = 'thumbnail';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '❌';
+            deleteBtn.className = 'delete-image';
+            deleteBtn.onclick = () => removeImage(index);
+            
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(deleteBtn);
+            existingImagesDiv.appendChild(imgContainer);
+        });
+        
+        imagePreviewContainer.appendChild(existingImagesDiv);
+    }
+}
+
+// Função para remover imagem
+function removeImage(index) {
+    const vehicle = currentVehicle; // Variável global para armazenar o veículo atual
+    if (vehicle && vehicle.fotos) {
+        vehicle.fotos.splice(index, 1);
+        fillForm(vehicle); // Atualizar preview
+    }
+}
+
+// Atualizar a função de envio do formulário
+async function handleSubmit(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const vehicleId = document.getElementById('vehicleId').value;
+    
+    // Se estiver editando, adicionar fotos existentes
+    if (vehicleId && currentVehicle && currentVehicle.fotos) {
+        formData.append('fotosExistentes', JSON.stringify(currentVehicle.fotos));
+    }
+    
+    try {
+        const url = vehicleId ? 
+            `/api/vehicles/${vehicleId}` : 
+            '/api/vehicles';
+            
+        const response = await fetch(url, {
+            method: vehicleId ? 'PUT' : 'POST',
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${getToken()}`
+            }
+        });
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        alert(vehicleId ? 'Veículo atualizado com sucesso!' : 'Veículo cadastrado com sucesso!');
+        closeModal();
+        loadVehicles();
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao salvar veículo');
+    }
 }
 
 async function deleteVehicle(id) {
@@ -418,97 +496,53 @@ async function showVehicleDetails(id) {
         if (!response.ok) throw new Error('Erro ao carregar veículo');
 
         const vehicle = await response.json();
-        const detailsModal = document.getElementById('vehicle-details-modal');
-        
-        // Criar modal se não existir
-        if (!detailsModal) {
-            const modal = document.createElement('div');
-            modal.id = 'vehicle-details-modal';
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content details-modal">
-                    <div class="modal-header">
-                        <h2>Detalhes do Veículo</h2>
-                        <button class="close-modal" onclick="closeDetailsModal()">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="vehicle-gallery">
-                            <div class="main-photo">
-                                <img id="detail-main-photo" src="" alt="Foto principal">
-                                <button class="gallery-nav prev" onclick="changePhoto(-1)">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button class="gallery-nav next" onclick="changePhoto(1)">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                            <div class="thumbnails" id="detail-thumbnails"></div>
-                        </div>
-                        <div class="vehicle-details">
-                            <h3 id="detail-title"></h3>
-                            <div class="detail-specs"></div>
-                            <div class="detail-description"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        // Preencher dados do veículo
         const modal = document.getElementById('vehicle-details-modal');
-        const mainPhoto = document.getElementById('detail-main-photo');
-        const thumbnails = document.getElementById('detail-thumbnails');
-        const title = document.getElementById('detail-title');
-        const specs = document.querySelector('.detail-specs');
-        const description = document.querySelector('.detail-description');
-
-        // Configurar galeria de fotos
-        if (vehicle.fotos && vehicle.fotos.length > 0) {
-            mainPhoto.src = vehicle.fotos[0];
-            thumbnails.innerHTML = vehicle.fotos.map((foto, index) => `
-                <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainPhoto('${foto}', this)">
-                    <img src="${foto}" alt="Foto ${index + 1}">
-                </div>
-            `).join('');
+        
+        if (!modal) {
+            console.error('Modal não encontrado');
+            return;
         }
 
-        // Preencher informações
-        title.textContent = `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`;
-        specs.innerHTML = `
-            <div class="spec-row">
-                <div class="spec-item">
-                    <i class="fas fa-calendar"></i>
-                    <span>Ano: ${vehicle.ano}</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Quilometragem: ${vehicle.quilometragem.toLocaleString('pt-BR')} km</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-gas-pump"></i>
-                    <span>Combustível: ${vehicle.combustivel}</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Transmissão: ${vehicle.transmissao}</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-palette"></i>
-                    <span>Cor: ${vehicle.cor}</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-tag"></i>
-                    <span>Preço: R$ ${vehicle.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                </div>
+        // Atualizar conteúdo do modal
+        document.getElementById('vehicle-title').textContent = `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`;
+        document.getElementById('vehicle-price').textContent = `R$ ${vehicle.preco.toLocaleString('pt-BR')}`;
+        document.getElementById('vehicle-description').textContent = vehicle.descricao || 'Sem descrição disponível';
+
+        // Atualizar especificações
+        const specList = document.getElementById('spec-list');
+        specList.innerHTML = `
+            <div class="spec-item">
+                <i class="fas fa-calendar"></i>
+                <span>Ano: ${vehicle.ano}</span>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>${vehicle.quilometragem.toLocaleString('pt-BR')} km</span>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-gas-pump"></i>
+                <span>${vehicle.combustivel}</span>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-cog"></i>
+                <span>${vehicle.transmissao}</span>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-palette"></i>
+                <span>${vehicle.cor}</span>
             </div>
         `;
-        description.innerHTML = `
-            <h4>Descrição</h4>
-            <p>${vehicle.descricao}</p>
-        `;
 
+        // Atualizar botões de ação
+        document.getElementById('btn-financiamento').onclick = () => 
+            window.location.href = `/financiamento?id=${vehicle._id}`;
+
+        // Atualizar galeria de fotos
+        updateGallery(vehicle.fotos);
+        
+        // Mostrar modal
         modal.classList.add('active');
+
     } catch (error) {
         console.error('Erro:', error);
         alert('Erro ao carregar detalhes do veículo');
@@ -517,7 +551,12 @@ async function showVehicleDetails(id) {
 
 function closeDetailsModal() {
     const modal = document.getElementById('vehicle-details-modal');
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        // Limpar variáveis globais
+        currentPhotoIndex = 0;
+        vehiclePhotos = [];
+    }
 }
 
 // Variáveis para controle da galeria
@@ -525,19 +564,58 @@ let currentPhotoIndex = 0;
 let vehiclePhotos = [];
 
 function changePhoto(direction) {
+    if (!vehiclePhotos || vehiclePhotos.length === 0) return;
+    
+    currentPhotoIndex += direction;
+    if (currentPhotoIndex >= vehiclePhotos.length) currentPhotoIndex = 0;
+    if (currentPhotoIndex < 0) currentPhotoIndex = vehiclePhotos.length - 1;
+    
     const mainPhoto = document.getElementById('detail-main-photo');
     const thumbnails = document.querySelectorAll('.thumbnail');
     
     if (!mainPhoto || thumbnails.length === 0) return;
     
-    currentPhotoIndex += direction;
-    if (currentPhotoIndex >= thumbnails.length) currentPhotoIndex = 0;
-    if (currentPhotoIndex < 0) currentPhotoIndex = thumbnails.length - 1;
-    
-    const newSrc = thumbnails[currentPhotoIndex].querySelector('img').src;
-    mainPhoto.src = newSrc;
+    mainPhoto.src = vehiclePhotos[currentPhotoIndex];
     
     // Atualizar thumbnail ativa
     thumbnails.forEach(thumb => thumb.classList.remove('active'));
     thumbnails[currentPhotoIndex].classList.add('active');
+}
+
+// Adicione esta função após a função showVehicleDetails
+function updateGallery(fotos) {
+    const mainPhoto = document.getElementById('detail-main-photo');
+    const thumbnails = document.getElementById('detail-thumbnails');
+    
+    if (!mainPhoto || !thumbnails || !fotos || fotos.length === 0) return;
+
+    // Atualizar foto principal
+    mainPhoto.src = fotos[0];
+    
+    // Atualizar thumbnails
+    thumbnails.innerHTML = fotos.map((foto, index) => `
+        <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainPhoto('${foto}', this)">
+            <img src="${foto}" alt="Foto ${index + 1}">
+        </div>
+    `).join('');
+
+    // Atualizar variáveis globais para controle da galeria
+    currentPhotoIndex = 0;
+    vehiclePhotos = fotos;
+}
+
+// Adicione esta função para mudar a foto principal ao clicar na thumbnail
+function changeMainPhoto(src, thumbElement) {
+    const mainPhoto = document.getElementById('detail-main-photo');
+    if (!mainPhoto) return;
+
+    mainPhoto.src = src;
+    
+    // Atualizar thumbnail ativa
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+    thumbElement.classList.add('active');
+    
+    // Atualizar índice atual
+    currentPhotoIndex = Array.from(thumbnails).indexOf(thumbElement);
 } 

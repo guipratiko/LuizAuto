@@ -27,10 +27,11 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 50 * 1024 * 1024 // 50MB
+        fileSize: 500 * 1024 * 1024, // 500MB
+        files: 10 // Limite explícito de 10 arquivos
     }
 });
 
@@ -77,17 +78,28 @@ router.post('/', verificarToken, upload.array('fotos', 10), async (req, res) => 
 router.put('/:id', verificarToken, upload.array('fotos', 10), async (req, res) => {
     try {
         const vehicleData = req.body;
+        
+        // Combinar fotos existentes com novas fotos
+        const fotosExistentes = JSON.parse(vehicleData.fotosExistentes || '[]');
         if (req.files && req.files.length > 0) {
-            vehicleData.fotos = req.files.map(file => `/uploads/vehicles/${file.filename}`);
+            const novasFotos = req.files.map(file => `/uploads/vehicles/${file.filename}`);
+            vehicleData.fotos = [...fotosExistentes, ...novasFotos];
+        } else {
+            vehicleData.fotos = fotosExistentes;
         }
+        
+        // Remover campo auxiliar
+        delete vehicleData.fotosExistentes;
         
         const vehicle = await Vehicle.findByIdAndUpdate(
             req.params.id,
             vehicleData,
             { new: true }
         );
+        
         res.json(vehicle);
     } catch (error) {
+        console.error('Erro ao atualizar veículo:', error);
         res.status(400).json({ message: error.message });
     }
 });
@@ -100,6 +112,15 @@ router.delete('/:id', verificarToken, async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+});
+
+// Adicione esta rota temporária para teste
+router.get('/test-upload', (req, res) => {
+    res.json({
+        multerLimits: upload.limits,
+        nginxLimit: '200MB',
+        uploadDir: process.env.UPLOAD_DIR
+    });
 });
 
 module.exports = router; 

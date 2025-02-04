@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    setupMenuToggle();
     carregarVeiculos();
     setupForm();
     setupMasks();
@@ -102,5 +103,50 @@ function setupMasks() {
         padFractionalZeros: true,
         normalizeZeros: true,
         radix: ','
+    });
+}
+
+function setupMenuToggle() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (!menuToggle || !navLinks) return;
+
+    // Criar overlay se não existir
+    if (!document.querySelector('.menu-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'menu-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    menuToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        document.querySelector('.menu-overlay').classList.toggle('active');
+        document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+    });
+
+    // Fechar menu ao clicar no overlay
+    document.querySelector('.menu-overlay').addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        document.querySelector('.menu-overlay').classList.remove('active');
+        document.body.style.overflow = '';
+    });
+
+    // Fechar menu ao clicar em um link
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('active');
+            document.querySelector('.menu-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+
+    // Fechar menu ao pressionar ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            document.querySelector('.menu-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
     });
 } 

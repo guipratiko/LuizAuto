@@ -7,15 +7,43 @@ function setupMenuToggle() {
     const menuToggle = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
     
-    menuToggle.addEventListener('click', (e) => {
-        e.preventDefault(); // Previne comportamento padrão
+    if (!menuToggle || !navLinks) return;
+
+    // Criar overlay se não existir
+    if (!document.querySelector('.menu-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'menu-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    menuToggle.addEventListener('click', () => {
         navLinks.classList.toggle('active');
+        document.querySelector('.menu-overlay').classList.toggle('active');
+        document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
     });
 
-    // Adiciona evento para fechar menu ao clicar em um link
-    navLinks.addEventListener('click', (e) => {
-        if (e.target.tagName === 'A') {
+    // Fechar menu ao clicar no overlay
+    document.querySelector('.menu-overlay').addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        document.querySelector('.menu-overlay').classList.remove('active');
+        document.body.style.overflow = '';
+    });
+
+    // Fechar menu ao clicar em um link
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
             navLinks.classList.remove('active');
+            document.querySelector('.menu-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+
+    // Fechar menu ao pressionar ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            document.querySelector('.menu-overlay').classList.remove('active');
+            document.body.style.overflow = '';
         }
     });
 }
@@ -58,103 +86,48 @@ function displayVehicles(vehicles) {
 
     grid.innerHTML = vehicles.map(vehicle => `
         <div class="vehicle-card" onclick="showVehicleDetails('${vehicle._id}')">
-            <img src="${vehicle.fotos?.[0] || '/images/no-image.svg'}" alt="${vehicle.marca} ${vehicle.modelo}" class="vehicle-image">
+            <img src="${vehicle.fotos[0] || '/images/no-image.svg'}" alt="${vehicle.marca} ${vehicle.modelo}">
             <div class="vehicle-info">
-                <h3 class="vehicle-title">${vehicle.marca} ${vehicle.modelo}</h3>
-                <p class="vehicle-price">R$ ${vehicle.preco?.toLocaleString('pt-BR') || '0'}</p>
-                <div class="vehicle-details">
-                    <p><i class="fas fa-calendar"></i> ${vehicle.ano}</p>
-                    <p><i class="fas fa-tachometer-alt"></i> ${vehicle.quilometragem?.toLocaleString('pt-BR') || '0'} km</p>
-                    <p><i class="fas fa-gas-pump"></i> ${vehicle.combustivel}</p>
-                    <p><i class="fas fa-cog"></i> ${vehicle.transmissao}</p>
+                <h3>${vehicle.marca} ${vehicle.modelo}</h3>
+                <p class="price">R$ ${vehicle.preco.toLocaleString('pt-BR')}</p>
+                <div class="specs">
+                    <span><i class="fas fa-calendar"></i> ${vehicle.ano}</span>
+                    <span><i class="fas fa-tachometer-alt"></i> ${vehicle.quilometragem.toLocaleString('pt-BR')} km</span>
                 </div>
             </div>
         </div>
     `).join('');
 }
 
-// Função para mostrar detalhes do veículo em um modal
+// Função para mostrar detalhes do veículo
 async function showVehicleDetails(id) {
     try {
         const response = await fetch(`/api/vehicles/${id}`);
         if (!response.ok) throw new Error('Erro ao carregar veículo');
 
         const vehicle = await response.json();
-        const detailsModal = document.getElementById('vehicle-details-modal');
         
-        // Criar modal se não existir
-        if (!detailsModal) {
-            const modal = document.createElement('div');
-            modal.id = 'vehicle-details-modal';
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content details-modal">
-                    <div class="modal-header">
-                        <h2>Detalhes do Veículo</h2>
-                        <button class="close-modal" onclick="closeDetailsModal()">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="vehicle-gallery">
-                            <div class="main-photo">
-                                <img id="detail-main-photo" src="" alt="Foto principal">
-                                <button class="gallery-nav prev" onclick="changePhoto(-1)">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button class="gallery-nav next" onclick="changePhoto(1)">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                            <div class="thumbnails" id="detail-thumbnails"></div>
-                        </div>
-                        <div class="vehicle-details">
-                            <h3 id="detail-title"></h3>
-                            <div class="detail-specs"></div>
-                            <div class="detail-description"></div>
-                            <div class="contact-buttons">
-                                <a href="#" class="btn-whatsapp" id="whatsapp-btn">
-                                    <i class="fab fa-whatsapp"></i>
-                                    Contato via WhatsApp
-                                </a>
-                                <button class="btn-contact" onclick="showContactForm()">
-                                    <i class="fas fa-envelope"></i>
-                                    Solicitar Informações
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        // Preencher dados do veículo
-        const modal = document.getElementById('vehicle-details-modal');
-        const mainPhoto = document.getElementById('detail-main-photo');
-        const thumbnails = document.getElementById('detail-thumbnails');
-        const title = document.getElementById('detail-title');
-        const specs = document.querySelector('.detail-specs');
-        const description = document.querySelector('.detail-description');
-        const whatsappBtn = document.getElementById('whatsapp-btn');
-
+        // Atualizar os elementos do modal
+        document.getElementById('vehicle-title').textContent = `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`;
+        document.getElementById('vehicle-price').textContent = `R$ ${vehicle.preco.toLocaleString('pt-BR')}`;
+        
         // Configurar galeria de fotos
         if (vehicle.fotos && vehicle.fotos.length > 0) {
+            const mainPhoto = document.getElementById('detail-main-photo');
             mainPhoto.src = vehicle.fotos[0];
-            thumbnails.innerHTML = vehicle.fotos.map((foto, index) => `
+            mainPhoto.onerror = () => {
+                mainPhoto.src = '/images/no-image.svg';
+            };
+
+            document.getElementById('detail-thumbnails').innerHTML = vehicle.fotos.map((foto, index) => `
                 <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainPhoto('${foto}', this)">
-                    <img src="${foto}" alt="Foto ${index + 1}">
+                    <img src="${foto}" alt="Foto ${index + 1}" onerror="this.src='/images/no-image.svg'">
                 </div>
             `).join('');
         }
 
-        // Configurar link do WhatsApp com novo número e mensagem
-        const whatsappMessage = encodeURIComponent(
-            `Achei um veículo no site de vocês, gostaria de saber mais\n\n${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`
-        );
-        whatsappBtn.href = `https://wa.me/556232470376?text=${whatsappMessage}`;
-
-        // Preencher informações
-        title.textContent = `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`;
-        specs.innerHTML = `
+        // Preencher especificações
+        document.getElementById('spec-list').innerHTML = `
             <div class="spec-row">
                 <div class="spec-item">
                     <i class="fas fa-calendar"></i>
@@ -176,36 +149,42 @@ async function showVehicleDetails(id) {
                     <i class="fas fa-palette"></i>
                     <span>Cor: ${vehicle.cor}</span>
                 </div>
-                <div class="spec-item price-item">
-                    <i class="fas fa-tag"></i>
-                    <span>R$ ${vehicle.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                </div>
             </div>
         `;
-        description.innerHTML = `
-            <h4>Descrição</h4>
-            <p>${vehicle.descricao}</p>
-        `;
 
-        modal.classList.add('active');
+        // Preencher descrição
+        document.getElementById('vehicle-description').textContent = vehicle.descricao;
+
+        // Configurar link do WhatsApp
+        const whatsappMessage = encodeURIComponent(
+            `Achei um veículo no site de vocês, gostaria de saber mais\n\n${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`
+        );
+        document.getElementById('btn-whatsapp').href = `https://wa.me/556232470376?text=${whatsappMessage}`;
+
+        // Mostrar o modal
+        document.getElementById('vehicle-details-modal').classList.add('active');
     } catch (error) {
         console.error('Erro:', error);
         alert('Erro ao carregar detalhes do veículo');
     }
 }
 
+// Função para fechar o modal
 function closeDetailsModal() {
     const modal = document.getElementById('vehicle-details-modal');
     if (modal) {
         modal.classList.remove('active');
-        // Remover o modal do DOM após a animação
-        setTimeout(() => {
-            modal.remove();
-        }, 300);
+        // Limpar conteúdo do modal
+        document.getElementById('detail-main-photo').src = '';
+        document.getElementById('detail-thumbnails').innerHTML = '';
+        document.getElementById('vehicle-title').textContent = '';
+        document.getElementById('vehicle-price').textContent = '';
+        document.getElementById('spec-list').innerHTML = '';
+        document.getElementById('vehicle-description').textContent = '';
     }
 }
 
-// Adicionar evento para fechar o modal ao clicar fora dele
+// Evento para fechar o modal ao clicar fora
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('vehicle-details-modal');
     if (modal && e.target === modal) {
@@ -231,8 +210,13 @@ function changePhoto(direction) {
     if (!mainPhoto || thumbnails.length === 0) return;
     
     currentPhotoIndex += direction;
-    if (currentPhotoIndex >= thumbnails.length) currentPhotoIndex = 0;
-    if (currentPhotoIndex < 0) currentPhotoIndex = thumbnails.length - 1;
+    
+    // Loop circular nas fotos
+    if (currentPhotoIndex >= thumbnails.length) {
+        currentPhotoIndex = 0;
+    } else if (currentPhotoIndex < 0) {
+        currentPhotoIndex = thumbnails.length - 1;
+    }
     
     const newSrc = thumbnails[currentPhotoIndex].querySelector('img').src;
     mainPhoto.src = newSrc;
@@ -240,6 +224,10 @@ function changePhoto(direction) {
     // Atualizar thumbnail ativa
     thumbnails.forEach(thumb => thumb.classList.remove('active'));
     thumbnails[currentPhotoIndex].classList.add('active');
+    
+    // Scroll para a thumbnail ativa
+    const activeThumb = thumbnails[currentPhotoIndex];
+    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 
 function changeMainPhoto(src, thumbnail) {
@@ -247,10 +235,27 @@ function changeMainPhoto(src, thumbnail) {
     if (!mainPhoto) return;
 
     mainPhoto.src = src;
+    mainPhoto.onerror = () => {
+        mainPhoto.src = '/images/no-image.svg';
+    };
     
     // Atualizar thumbnail ativa
     document.querySelectorAll('.thumbnail').forEach(thumb => {
         thumb.classList.remove('active');
     });
     thumbnail.classList.add('active');
-} 
+}
+
+// Adicionar suporte para navegação com teclado
+document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('vehicle-details-modal');
+    if (modal && modal.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') {
+            changePhoto(-1);
+        } else if (e.key === 'ArrowRight') {
+            changePhoto(1);
+        } else if (e.key === 'Escape') {
+            closeDetailsModal();
+        }
+    }
+}); 

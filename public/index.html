@@ -79,6 +79,56 @@
         </div>
     </footer>
 
+    <div id="modals-container">
+        <div id="vehicle-details-modal" class="modal">
+            <div class="modal-content details-modal">
+                <div class="modal-header">
+                    <h2 id="vehicle-title"></h2>
+                    <button class="close-modal" onclick="closeDetailsModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="vehicle-gallery">
+                        <div class="main-photo">
+                            <img id="detail-main-photo" src="" alt="Foto principal">
+                            <div class="gallery-controls">
+                                <button class="gallery-nav prev" onclick="changePhoto(-1)">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="gallery-nav next" onclick="changePhoto(1)">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="thumbnails-wrapper">
+                            <div class="thumbnails" id="detail-thumbnails"></div>
+                        </div>
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="vehicle-price-highlight">
+                            <h3 id="vehicle-price" style="font-size: 2.8rem; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.2);"></h3>
+                            <span class="price-condition" style="font-size: 1.2rem; color: rgba(255,255,255,0.9);">À vista</span>
+                        </div>
+                        <div class="vehicle-specs">
+                            <div class="spec-group">
+                                <h4>Informações Gerais</h4>
+                                <div class="spec-row" id="spec-list"></div>
+                            </div>
+                        </div>
+                        <div class="vehicle-description">
+                            <h4>Descrição</h4>
+                            <p id="vehicle-description"></p>
+                        </div>
+                        <div class="vehicle-actions">
+                            <a href="#" class="btn-whatsapp" id="btn-whatsapp">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="/js/main.js"></script>
 </body>
 </html> 
