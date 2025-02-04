@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+mongoose.set('strictQuery', false);
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
@@ -42,6 +43,7 @@ app.use('/api/vendas', vendasRoutes);
 
 // Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Rota para página de detalhes do veículo
 app.get('/veiculo/:id', (req, res) => {
