@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Luiz Automóveis</title>
+    <title>Solicitações de Venda - Luiz Automóveis</title>
     <link rel="stylesheet" href="/css/dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -11,14 +11,14 @@
 <body class="dashboard">
     <nav class="sidebar">
         <div class="sidebar-header">
-            <img src="/images/logo.png" alt="Premium Motors" class="dashboard-logo">
+            <img src="/images/logo.png" alt="Luiz Automóveis" class="dashboard-logo">
         </div>
         <ul class="nav-menu">
             <li><a href="/">
                 <i class="fas fa-home"></i>
                 <span>Site Principal</span>
             </a></li>
-            <li class="active">
+            <li>
                 <a href="/dashboard">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
@@ -30,7 +30,7 @@
                     <span>Veículos</span>
                 </a>
             </li>
-            <li>
+            <li class="active">
                 <a href="/dashboard/vendas">
                     <i class="fas fa-handshake"></i>
                     <span>Solicitações de Venda</span>
@@ -69,60 +69,30 @@
         </header>
 
         <div class="dashboard-content">
-            <div class="dashboard-header">
-                <h1>Dashboard</h1>
-                <p>Bem-vindo ao painel administrativo</p>
+            <div class="content-header-actions">
+                <h1>Solicitações de Venda</h1>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-car"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>Total de Veículos</h3>
-                        <p id="total-veiculos">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>Financiamentos Pendentes</h3>
-                        <p id="total-financiamentos">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>Vendas Pendentes</h3>
-                        <p id="total-vendas">0</p>
-                    </div>
-                </div>
-                <div class="stat-card" data-type="contatos">
-                    <div class="stat-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 class="stat-title">Mensagens</h3>
-                        <p class="stat-count">0</p>
-                        <p class="stat-label">Não lidas</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="recent-section">
-                <h2>Atividades Recentes</h2>
-                <div class="activities-list" id="activities-list">
-                    <!-- Atividades serão inseridas via JavaScript -->
-                </div>
+            <div class="vendas-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Cliente</th>
+                            <th>Veículo</th>
+                            <th>Contato</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vendas-table-body">
+                        <!-- Dados serão inseridos via JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
 
-    <script src="/js/dashboard.js"></script>
+    <script src="/js/dashboard-vendas.js"></script>
 </body>
 </html> 

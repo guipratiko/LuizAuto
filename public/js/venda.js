@@ -57,32 +57,45 @@ function populateSelect(id, options) {
 function setupForm() {
     const form = document.getElementById('sell-form');
     
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        
-        try {
-            const response = await fetch('/api/venda', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(form);
+                const data = {
+                    marca: formData.get('marca'),
+                    modelo: formData.get('modelo'),
+                    ano: formData.get('ano'),
+                    quilometragem: formData.get('quilometragem'),
+                    nome: formData.get('nome'),
+                    email: formData.get('email'),
+                    telefone: formData.get('telefone'),
+                    observacoes: formData.get('observacoes')
+                };
 
-            if (response.ok) {
-                alert('Solicitação enviada com sucesso! Em breve entraremos em contato para avaliação.');
+                const response = await fetch('/api/vendas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao enviar formulário');
+                }
+
+                const result = await response.json();
+                alert(result.message);
                 form.reset();
-            } else {
-                throw new Error('Erro ao enviar formulário');
+
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao enviar formulário. Por favor, tente novamente.');
             }
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao enviar formulário. Por favor, tente novamente.');
-        }
-    });
+        });
+    }
 }
 
 function setupMasks() {

@@ -34,9 +34,11 @@ app.use((req, res, next) => {
 
 // Importar rotas
 const apiRoutes = require('./src/routes/api');
+const vendasRoutes = require('./src/routes/vendas');
 
 // Usar rotas
 app.use('/api', apiRoutes);
+app.use('/api/vendas', vendasRoutes);
 
 // Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
@@ -86,6 +88,10 @@ app.get('/dashboard/financiamentos', (req, res) => {
 
 app.get('/dashboard/contatos', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard', 'contatos.html'));
+});
+
+app.get('/dashboard/vendas', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard', 'vendas.html'));
 });
 
 // Middleware de autenticação para rotas protegidas
