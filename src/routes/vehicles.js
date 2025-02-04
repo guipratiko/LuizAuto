@@ -1,10 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const Vehicle = require('../models/Vehicle');
-const verificarToken = require('../middleware/auth');
+console.log('Carregando módulo vehicles.js...');
+
 const multer = require('multer');
+console.log('Multer carregado');
+
 const path = require('path');
 const fs = require('fs');
+const Vehicle = require('../models/Vehicle');
+console.log('Model Vehicle carregado');
+
+const verificarToken = require('../middleware/auth');
+console.log('Middleware auth carregado');
 
 // Configuração do Multer
 const storage = multer.diskStorage({
