@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque - Luiz Automóveis</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="Premium Motors">
+                </a>
+            </div>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Início</a></li>
+                <li class="active"><a href="/estoque">Estoque</a></li>
+                <li><a href="/financiamento">Financiamento</a></li>
+                <li><a href="/venda">Venda seu Veículo</a></li>
+                <li><a href="/contato">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="page-header">
+        <h1>Nosso Estoque</h1>
+    </section>
+
+    <section class="vehicles-section">
+        <div class="filters">
+            <select id="filter-marca" class="filter-select">
+                <option value="">Todas as Marcas</option>
+                <option value="Fiat">Fiat</option>
+                <option value="Chevrolet">Chevrolet</option>
+                <option value="Volkswagen">Volkswagen</option>
+                <option value="Ford">Ford</option>
+                <option value="Toyota">Toyota</option>
+                <option value="Honda">Honda</option>
+                <option value="Hyundai">Hyundai</option>
+                <option value="Renault">Renault</option>
+                <option value="Nissan">Nissan</option>
+                <option value="Jeep">Jeep</option>
+                <option value="Peugeot">Peugeot</option>
+                <option value="Citroën">Citroën</option>
+                <option value="Mitsubishi">Mitsubishi</option>
+                <option value="Kia">Kia</option>
+                <option value="BMW">BMW</option>
+                <option value="Mercedes-Benz">Mercedes-Benz</option>
+                <option value="Audi">Audi</option>
+                <option value="Volvo">Volvo</option>
+                <option value="Land Rover">Land Rover</option>
+            </select>
+
+            <select id="filter-ano" class="filter-select">
+                <option value="">Todos os Anos</option>
+                <!-- Anos preenchidos via JavaScript -->
+            </select>
+
+            <select id="filter-cor" class="filter-select">
+                <option value="">Todas as Cores</option>
+                <option value="Branco">Branco</option>
+                <option value="Preto">Preto</option>
+                <option value="Prata">Prata</option>
+                <option value="Cinza">Cinza</option>
+                <option value="Vermelho">Vermelho</option>
+                <option value="Azul">Azul</option>
+                <option value="Verde">Verde</option>
+                <!-- Adicione outras cores conforme necessário -->
+            </select>
+
+            <select id="filter-preco" class="filter-select">
+                <option value="">Todas as Faixas de Preço</option>
+                <option value="0-30000">Até R$ 30.000</option>
+                <option value="30000-50000">R$ 30.000 - R$ 50.000</option>
+                <option value="50000-80000">R$ 50.000 - R$ 80.000</option>
+                <option value="80000-100000">R$ 80.000 - R$ 100.000</option>
+                <option value="100000-150000">R$ 100.000 - R$ 150.000</option>
+                <option value="150000-200000">R$ 150.000 - R$ 200.000</option>
+                <option value="200000-">Acima de R$ 200.000</option>
+            </select>
+        </div>
+
+        <div class="vehicles-grid" id="vehicles-grid">
+            <!-- Veículos serão inseridos aqui via JavaScript -->
+        </div>
+        <div class="pagination" id="pagination">
+            <!-- Paginação será inserida via JavaScript -->
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Premium Motors</h3>
+                <p>Seu carro dos sonhos está aqui</p>
+                <p>CNPJ: XX.XXX.XXX/0001-XX</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contato</h3>
+                <p><i class="fas fa-phone"></i> (11) 99999-9999</p>
+                <p><i class="fas fa-envelope"></i> contato@premiummotors.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Rua Example, 123 - São Paulo/SP</p>
+            </div>
+            <div class="footer-section">
+                <h3>Redes Sociais</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/estoque.js"></script>
+</body>
+</html> 

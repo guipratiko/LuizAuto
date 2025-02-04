@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Veículos - Luiz Automóveis</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="dashboard">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <img src="/images/logo.png" alt="Premium Motors" class="dashboard-logo">
+        </div>
+        <ul class="nav-menu">
+            <li><a href="/">
+                <i class="fas fa-home"></i>
+                <span>Site Principal</span>
+            </a></li>
+            <li>
+                <a href="/dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="/dashboard/veiculos">
+                    <i class="fas fa-car"></i>
+                    <span>Veículos</span>
+                </a>
+            </li>
+            <li>
+                <a href="/dashboard/financiamentos">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Financiamentos</span>
+                </a>
+            </li>
+            <li>
+                <a href="/dashboard/contatos">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contatos</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logout-btn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="content-header">
+            <button class="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="user-info">
+                <span id="user-name">Administrador</span>
+                <img src="/images/avatar.png" alt="Avatar" class="user-avatar">
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <div class="content-header-actions">
+                <h1>Gerenciar Veículos</h1>
+                <button id="add-vehicle-btn" class="btn-primary">
+                    <i class="fas fa-plus"></i> Novo Veículo
+                </button>
+            </div>
+
+            <div class="filters-section">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Buscar veículos...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="filter-group">
+                    <select id="filter-marca">
+                        <option value="">Todas as Marcas</option>
+                    </select>
+                    <select id="filter-status">
+                        <option value="">Todos os Status</option>
+                        <option value="disponivel">Disponível</option>
+                        <option value="vendido">Vendido</option>
+                        <option value="reservado">Reservado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="vehicles-grid" id="vehicles-grid">
+                <!-- Veículos serão inseridos via JavaScript -->
+            </div>
+
+            <div class="pagination" id="pagination">
+                <!-- Paginação será inserida via JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Veículo -->
+    <div id="vehicle-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Novo Veículo</h2>
+                <button class="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="vehicle-form" class="vehicle-form">
+                <div class="vehicle-form-grid">
+                    <div class="form-group">
+                        <label for="marca">Marca*</label>
+                        <select id="marca" name="marca" required>
+                            <option value="">Selecione a marca</option>
+                            <option value="Fiat">Fiat</option>
+                            <option value="Chevrolet">Chevrolet</option>
+                            <option value="Volkswagen">Volkswagen</option>
+                            <option value="Ford">Ford</option>
+                            <option value="Toyota">Toyota</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Hyundai">Hyundai</option>
+                            <option value="Renault">Renault</option>
+                            <option value="Nissan">Nissan</option>
+                            <option value="Jeep">Jeep</option>
+                            <option value="Peugeot">Peugeot</option>
+                            <option value="Citroën">Citroën</option>
+                            <option value="Mitsubishi">Mitsubishi</option>
+                            <option value="Kia">Kia</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Mercedes-Benz">Mercedes-Benz</option>
+                            <option value="Audi">Audi</option>
+                            <option value="Volvo">Volvo</option>
+                            <option value="Land Rover">Land Rover</option>
+                            <option value="Jaguar">Jaguar</option>
+                            <option value="Porsche">Porsche</option>
+                            <option value="Mini">Mini</option>
+                            <option value="Chery">Chery (Caoa Chery)</option>
+                            <option value="BYD">BYD</option>
+                            <option value="JAC Motors">JAC Motors</option>
+                            <option value="Subaru">Subaru</option>
+                            <option value="Suzuki">Suzuki</option>
+                            <option value="Ram">Ram</option>
+                            <option value="Maserati">Maserati</option>
+                            <option value="Ferrari">Ferrari</option>
+                            <option value="Lamborghini">Lamborghini</option>
+                            <option value="Rolls-Royce">Rolls-Royce</option>
+                            <option value="Bentley">Bentley</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modelo">Modelo*</label>
+                        <input type="text" id="modelo" name="modelo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ano">Ano*</label>
+                        <input type="number" id="ano" name="ano" min="1960" max="2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quilometragem">Quilometragem*</label>
+                        <input type="number" id="quilometragem" name="quilometragem" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="preco">Preço*</label>
+                        <input type="number" id="preco" name="preco" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cor">Cor*</label>
+                        <select id="cor" name="cor" required>
+                            <option value="">Selecione a cor</option>
+                            <option value="Branco">Branco</option>
+                            <option value="Preto">Preto</option>
+                            <option value="Prata">Prata</option>
+                            <option value="Cinza">Cinza</option>
+                            <option value="Azul metálico">Azul metálico</option>
+                            <option value="Verde metálico">Verde metálico</option>
+                            <option value="Vermelho metálico">Vermelho metálico</option>
+                            <option value="Bege metálico">Bege metálico</option>
+                            <option value="Dourado metálico">Dourado metálico</option>
+                            <option value="Vermelho">Vermelho</option>
+                            <option value="Azul">Azul</option>
+                            <option value="Verde">Verde</option>
+                            <option value="Amarelo">Amarelo</option>
+                            <option value="Laranja">Laranja</option>
+                            <option value="Champagne">Champagne</option>
+                            <option value="Grafite">Grafite</option>
+                            <option value="Marrom">Marrom</option>
+                            <option value="Vinho">Vinho</option>
+                            <option value="Azul royal">Azul royal</option>
+                            <option value="Verde esmeralda">Verde esmeralda</option>
+                            <option value="Rosa">Rosa</option>
+                            <option value="Fosco">Fosco</option>
+                            <option value="Duotone">Duotone</option>
+                            <option value="Perolizado">Perolizado</option>
+                            <option value="Glitter">Glitter</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="combustivel">Combustível*</label>
+                        <select id="combustivel" name="combustivel" required>
+                            <option value="">Selecione</option>
+                            <option value="Flex">Flex</option>
+                            <option value="Gasolina">Gasolina</option>
+                            <option value="Álcool">Álcool</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Elétrico">Elétrico</option>
+                            <option value="Híbrido">Híbrido</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transmissao">Transmissão*</label>
+                        <select id="transmissao" name="transmissao" required>
+                            <option value="">Selecione</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Automático">Automático</option>
+                            <option value="CVT">CVT</option>
+                            <option value="Semi-automático">Semi-automático</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="finalPlaca">Final da Placa*</label>
+                        <input type="number" 
+                               id="finalPlaca" 
+                               name="finalPlaca" 
+                               min="0" 
+                               max="9" 
+                               step="1"
+                               onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                               required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="descricao">Descrição*</label>
+                        <textarea id="descricao" name="descricao" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="fotos">Fotos (máx. 10)*</label>
+                        <div class="upload-area" id="upload-area">
+                            <input type="file" id="fotos" name="fotos" multiple accept="image/*" required>
+                            <div class="upload-preview" id="upload-preview"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/dashboard-vehicles.js"></script>
+</body>
+</html> 

@@ -9,11 +9,15 @@ const vehicleSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    anoFabricacao: {
+    ano: {
         type: Number,
         required: true
     },
     quilometragem: {
+        type: Number,
+        required: true
+    },
+    preco: {
         type: Number,
         required: true
     },
@@ -31,14 +35,18 @@ const vehicleSchema = new mongoose.Schema({
         required: true,
         enum: ['Manual', 'Automático', 'CVT', 'Semi-automático']
     },
-    preco: {
-        type: Number,
+    descricao: {
+        type: String,
         required: true
     },
     fotos: [{
         type: String
     }],
-    descricao: String,
+    status: {
+        type: String,
+        enum: ['disponivel', 'vendido', 'reservado'],
+        default: 'disponivel'
+    },
     finalPlaca: {
         type: Number,
         required: true,

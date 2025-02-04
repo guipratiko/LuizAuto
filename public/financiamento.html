@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financiamento - Luiz Automóveis</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/imask"></script>
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="Premium Motors">
+                </a>
+            </div>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Início</a></li>
+                <li><a href="/estoque">Estoque</a></li>
+                <li class="active"><a href="/financiamento">Financiamento</a></li>
+                <li><a href="/venda">Venda seu Veículo</a></li>
+                <li><a href="/contato">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="page-header">
+        <h1>Financiamento</h1>
+        <p>Simule seu financiamento e realize o sonho do seu carro novo</p>
+    </section>
+
+    <section class="finance-section">
+        <div class="finance-container">
+            <div class="finance-info">
+                <h2>Por que financiar conosco?</h2>
+                <ul class="benefits-list">
+                    <li><i class="fas fa-check"></i> Melhores taxas do mercado</li>
+                    <li><i class="fas fa-check"></i> Aprovação rápida</li>
+                    <li><i class="fas fa-check"></i> Parcelas que cabem no seu bolso</li>
+                    <li><i class="fas fa-check"></i> Diversos bancos parceiros</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="vehicles-selection">
+            <h2>Selecione um Veículo</h2>
+            <div class="vehicles-grid" id="vehicles-grid">
+                <!-- Veículos serão inseridos via JavaScript -->
+            </div>
+        </div>
+
+        <div id="finance-form-container" class="finance-form-container" style="display: none;">
+            <form id="finance-form" class="finance-form">
+                <h3>Solicitar Financiamento</h3>
+                <div class="selected-vehicle" id="selected-vehicle-info">
+                    <!-- Info do veículo selecionado será inserida aqui -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone">Telefone/WhatsApp</label>
+                    <input type="tel" id="telefone" name="telefone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="entrada">Valor de Entrada</label>
+                    <input type="text" id="entrada" name="entrada" required>
+                </div>
+
+                <input type="hidden" id="veiculo_id" name="veiculo_id">
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-handshake"></i>
+                    Solicitar Financiamento
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Premium Motors</h3>
+                <p>Seu carro dos sonhos está aqui</p>
+                <p>CNPJ: XX.XXX.XXX/0001-XX</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contato</h3>
+                <p><i class="fas fa-phone"></i> (11) 99999-9999</p>
+                <p><i class="fas fa-envelope"></i> contato@premiummotors.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Rua Example, 123 - São Paulo/SP</p>
+            </div>
+            <div class="footer-section">
+                <h3>Redes Sociais</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/financiamento.js"></script>
+</body>
+</html> 

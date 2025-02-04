@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contatos - Luiz Automóveis</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="dashboard">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <img src="/images/logo.png" alt="Premium Motors" class="dashboard-logo">
+        </div>
+        <ul class="nav-menu">
+            <li><a href="/">
+                <i class="fas fa-home"></i>
+                <span>Site Principal</span>
+            </a></li>
+            <li>
+                <a href="/dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/dashboard/veiculos">
+                    <i class="fas fa-car"></i>
+                    <span>Veículos</span>
+                </a>
+            </li>
+            <li>
+                <a href="/dashboard/financiamentos">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Financiamentos</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="/dashboard/contatos">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contatos</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logout-btn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="content-header">
+            <button class="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="user-info">
+                <span id="user-name">Administrador</span>
+                <img src="/images/avatar.png" alt="Avatar" class="user-avatar">
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <div class="content-header-actions">
+                <h1>Mensagens de Contato</h1>
+            </div>
+
+            <div class="contacts-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Assunto</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contacts-table-body">
+                        <!-- Dados serão inseridos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/dashboard-contacts.js"></script>
+</body>
+</html> 

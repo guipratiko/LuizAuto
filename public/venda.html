@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venda seu Veículo - Luiz Automóveis</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="Premium Motors">
+                </a>
+            </div>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Início</a></li>
+                <li><a href="/estoque">Estoque</a></li>
+                <li><a href="/financiamento">Financiamento</a></li>
+                <li class="active"><a href="/venda">Venda seu Veículo</a></li>
+                <li><a href="/contato">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="page-header">
+        <h1>Venda seu Veículo</h1>
+        <p>Faça uma avaliação gratuita do seu veículo</p>
+    </section>
+
+    <section class="sell-section">
+        <div class="sell-container">
+            <div class="sell-info">
+                <h2>Por que vender para nós?</h2>
+                <ul class="benefits-list">
+                    <li><i class="fas fa-check"></i> Avaliação justa e transparente</li>
+                    <li><i class="fas fa-check"></i> Pagamento imediato</li>
+                    <li><i class="fas fa-check"></i> Toda documentação por nossa conta</li>
+                    <li><i class="fas fa-check"></i> Processo rápido e seguro</li>
+                    <li><i class="fas fa-percentage"></i> Deixe seu veículo consignado a 1,5%</li>
+                </ul>
+            </div>
+            <form id="sell-form" class="sell-form">
+                <h3>Dados do Veículo</h3>
+                
+                <div class="form-group">
+                    <label for="marca">Marca</label>
+                    <select id="marca" name="marca" required>
+                        <option value="">Selecione a marca</option>
+                        <!-- Opções serão preenchidas via JavaScript -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="modelo">Modelo</label>
+                    <input type="text" id="modelo" name="modelo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="ano">Ano</label>
+                    <input type="number" id="ano" name="ano" min="1960" max="2024" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quilometragem">Quilometragem</label>
+                    <input type="number" id="quilometragem" name="quilometragem" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cor">Cor</label>
+                    <select id="cor" name="cor" required>
+                        <option value="">Selecione a cor</option>
+                        <!-- Opções serão preenchidas via JavaScript -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="combustivel">Combustível</label>
+                    <select id="combustivel" name="combustivel" required>
+                        <option value="">Selecione o combustível</option>
+                        <!-- Opções serão preenchidas via JavaScript -->
+                    </select>
+                </div>
+
+                <h3>Seus Dados</h3>
+
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone">Telefone/WhatsApp</label>
+                    <input type="tel" id="telefone" name="telefone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-car"></i> Solicitar Avaliação
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Luiz Automóveis</h3>
+                <p>Seu carro dos sonhos está aqui</p>
+                <p>CNPJ: 52.599.634/0001-06</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contato</h3>
+                <p><i class="fas fa-phone"></i> (62) 3247-0376</p>
+                <p><i class="fas fa-envelope"></i> contato@luizautomoveis.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Av. T-63, 2074 - Jardim América, Goiânia - GO</p>
+                <p><i class="fas fa-clock"></i> Seg-Sex: 08:00–18:00 | Sáb: 08:00–12:00</p>
+            </div>
+            <div class="footer-section">
+                <h3>Redes Sociais</h3>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/luizautomoveisgyn/" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/556232470376?text=Achei%20um%20ve%C3%ADculo%20no%20site%20de%20voc%C3%AAs%2C%20gostaria%20de%20saber%20mais" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/venda.js"></script>
+</body>
+</html> 

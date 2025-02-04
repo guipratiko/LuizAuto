@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Vehicle = require('../models/Vehicle');
 
+const vehiclesRoutes = require('./vehicles');
+const financiamentosRoutes = require('./financiamentos');
+const dashboardRoutes = require('./dashboard');
+const contatosRoutes = require('./contatos');
+
 // Listar todos os veículos
 router.get('/vehicles', async (req, res) => {
     try {
@@ -24,5 +29,10 @@ router.get('/vehicles/:id', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+
+router.use('/vehicles', vehiclesRoutes);
+router.use('/financiamentos', financiamentosRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/contatos', contatosRoutes);
 
 module.exports = router; 
