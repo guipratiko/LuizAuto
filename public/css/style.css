@@ -1587,4 +1587,44 @@ main {
     border-radius: 8px;
     overflow: hidden;
     margin-bottom: 3rem;
+}
+
+/* Grid de veículos em destaque */
+.featured-vehicles {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.featured-vehicles .vehicles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+/* Ajustes responsivos para o grid */
+@media (max-width: 992px) {
+    .featured-vehicles .vehicles-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .featured-vehicles {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .featured-vehicles .vehicles-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+/* Ajuste para garantir que apenas 9 cards sejam exibidos */
+.featured-vehicles .vehicles-grid .vehicle-card:nth-child(n+10) {
+    display: none;
 } 
