@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Vehicle = require('../models/Vehicle');
 
+// Importação das rotas
+console.log('Carregando rotas...');
 const vehiclesRoutes = require('./vehicles');
 const financiamentosRoutes = require('./financiamentos');
 const dashboardRoutes = require('./dashboard');
 const contatosRoutes = require('./contatos');
+console.log('Rotas carregadas com sucesso');
 
 // Listar todos os veículos
 router.get('/vehicles', async (req, res) => {
@@ -30,6 +33,7 @@ router.get('/vehicles/:id', async (req, res) => {
     }
 });
 
+// Uso das rotas
 router.use('/vehicles', vehiclesRoutes);
 router.use('/financiamentos', financiamentosRoutes);
 router.use('/dashboard', dashboardRoutes);
