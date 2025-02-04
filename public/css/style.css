@@ -577,23 +577,25 @@ body {
 }
 
 .sell-container {
+    max-width: 1200px;
+    margin: 90px auto 2rem;
+    padding: 0 2rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: start;
+    gap: 3rem;
 }
 
 .sell-info {
+    background: #fff;
     padding: 2rem;
-    background: var(--light-color);
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .sell-form {
-    background: var(--light-color);
+    background: #fff;
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
@@ -642,7 +644,7 @@ body {
 
 .contact-info {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     align-content: start;
 }
@@ -656,6 +658,7 @@ body {
     align-items: flex-start;
     gap: 1rem;
     transition: transform 0.3s ease;
+    width: 100%;
 }
 
 .info-item:hover {
@@ -666,10 +669,25 @@ body {
     font-size: 1.5rem;
     color: var(--primary-color);
     min-width: 30px;
+    flex-shrink: 0;
+}
+
+.info-item.email-item {
+    min-width: 0;
+    width: 100%;
+}
+
+.info-item.email-item p {
+    font-size: 0.9rem;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .info-item div {
     flex: 1;
+    min-width: 0;
 }
 
 .info-item h3 {
@@ -1627,4 +1645,220 @@ main {
 /* Ajuste para garantir que apenas 9 cards sejam exibidos */
 .featured-vehicles .vehicles-grid .vehicle-card:nth-child(n+10) {
     display: none;
+}
+
+/* Estilos para página de venda */
+.sell-container {
+    max-width: 1200px;
+    margin: 90px auto 2rem;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.sell-info {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.sell-form {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Ajustes responsivos para página de venda */
+@media (max-width: 768px) {
+    .sell-container {
+        margin: 70px auto 2rem;
+        padding: 1rem;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .sell-info {
+        padding: 1.5rem;
+        order: -1; /* Coloca as informações antes do formulário */
+    }
+
+    .sell-form {
+        padding: 1.5rem;
+    }
+
+    .sell-form .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .sell-form input,
+    .sell-form textarea,
+    .sell-form select {
+        padding: 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .photo-upload-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+
+    .photo-upload-box {
+        padding-top: 75%; /* Mantém proporção 4:3 */
+    }
+
+    .benefits-list li {
+        font-size: 0.95rem;
+        margin-bottom: 0.8rem;
+        padding-left: 1.8rem;
+    }
+
+    .benefits-list li i {
+        font-size: 1rem;
+        left: 0;
+    }
+
+    .submit-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 480px) {
+    .sell-container {
+        margin: 60px auto 1.5rem;
+        padding: 0.8rem;
+        gap: 1.2rem;
+    }
+
+    .sell-info,
+    .sell-form {
+        padding: 1.2rem;
+        border-radius: 8px;
+    }
+
+    .sell-form h2,
+    .sell-info h2 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .sell-form .form-group label {
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .photo-upload-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+    }
+
+    .photo-preview {
+        height: 120px;
+    }
+
+    .benefits-list {
+        margin-top: 1rem;
+    }
+
+    .benefits-list li {
+        font-size: 0.9rem;
+        margin-bottom: 0.7rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 0.8rem;
+    }
+}
+
+/* Ajustes para altura da tela */
+@media (max-height: 700px) {
+    .sell-container {
+        margin: 60px auto 1rem;
+    }
+
+    .sell-info,
+    .sell-form {
+        padding: 1rem;
+    }
+}
+
+/* Ajustes para info-item na página de contato */
+.info-item {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: transform 0.3s ease;
+    width: 100%;
+}
+
+.info-item.email-item {
+    min-width: 0;
+    width: 100%;
+}
+
+.info-item.email-item p {
+    font-size: 0.9rem;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.info-item div {
+    flex: 1;
+    min-width: 0;
+}
+
+.info-item h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: var(--dark-color);
+}
+
+.info-item p {
+    margin: 0;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Ajustes responsivos para info-item */
+@media (max-width: 768px) {
+    .info-item {
+        padding: 1.2rem;
+        width: 100%;
+    }
+
+    .info-item.email-item p {
+        font-size: 0.85rem;
+        letter-spacing: -0.5px;
+    }
+
+    .info-item i {
+        font-size: 1.3rem;
+        min-width: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-item {
+        padding: 1rem;
+    }
+
+    .info-item.email-item p {
+        font-size: 0.8rem;
+    }
+
+    .info-item i {
+        font-size: 1.2rem;
+        min-width: 20px;
+    }
 } 
