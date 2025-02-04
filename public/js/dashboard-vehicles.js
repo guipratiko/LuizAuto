@@ -140,9 +140,10 @@ function setupForm() {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = new FormData(form);
-        const modal = document.getElementById('vehicle-modal');
-        
+        console.log('Enviando formulário...');
+
+        const formData = new FormData(e.target);
+
         try {
             const token = localStorage.getItem('token');
             const response = await fetch('/api/vehicles', {
@@ -154,17 +155,18 @@ function setupForm() {
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Erro ao cadastrar veículo');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
+            const data = await response.json();
+            console.log('Sucesso:', data);
             alert('Veículo cadastrado com sucesso!');
             resetForm();
-            if (modal) modal.classList.remove('active');
+            if (e.target.closest('.modal')) e.target.closest('.modal').classList.remove('active');
             loadVehicles();
         } catch (error) {
             console.error('Erro:', error);
-            alert(error.message);
+            alert('Erro ao cadastrar veículo. Por favor, tente novamente.');
         }
     });
 
