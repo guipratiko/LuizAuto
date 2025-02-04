@@ -169,39 +169,146 @@ body {
 
 /* Footer */
 .footer {
-    background: var(--primary-color);
-    color: var(--light-color);
-    padding: 3rem 5%;
+    background-color: #ff6600; /* Laranja */
+    color: #fff;
+    padding: 40px 20px 20px;
+    margin-top: auto;
 }
 
 .footer-content {
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 250px;
 }
 
 .footer-section h3 {
-    color: var(--light-color);
-    margin-bottom: 1rem;
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.footer-section p {
+    margin-bottom: 10px;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.footer-section i {
+    margin-right: 10px;
+    color: #fff;
 }
 
 .social-links {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 15px;
 }
 
 .social-links a {
-    color: var(--light-color);
+    color: #fff;
     font-size: 1.5rem;
-    opacity: 0.9;
-    transition: opacity 0.3s;
+    transition: color 0.3s ease;
 }
 
 .social-links a:hover {
-    opacity: 1;
+    color: #4CAF50;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-bottom p {
+    color: #fff;
+    font-size: 0.8rem;
+}
+
+.footer-bottom a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.3s ease;
+}
+
+.footer-bottom a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* Admin Login Button */
+.admin-login {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 0.8rem;
+    border-radius: 50%;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.admin-login:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.admin-login i {
+    font-size: 1.2rem;
+}
+
+.admin-login span {
+    display: none;
+    margin-left: 8px;
+}
+
+/* Hover effect para mostrar o texto */
+.admin-login:hover span {
+    display: inline;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (min-width: 768px) {
+    .admin-login:hover {
+        border-radius: 25px;
+        padding: 0.8rem 1.2rem;
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-section {
+        margin-bottom: 30px;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
 }
 
 /* Page Header */
@@ -410,68 +517,6 @@ body {
     background: #ff8533;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-    .menu-toggle {
-        display: block;
-    }
-
-    .nav-links {
-        display: none;
-        position: absolute;
-        top: 70px;
-        left: 0;
-        right: 0;
-        background: #000000;
-        flex-direction: column;
-        padding: 1rem;
-        text-align: center;
-    }
-
-    .nav-links.active {
-        display: flex;
-    }
-
-    .hero-content h1 {
-        font-size: 2rem;
-    }
-
-    .vehicles-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .filters {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-
-    .filter-select {
-        width: 100%;
-    }
-
-    .filter-btn {
-        width: 100%;
-    }
-
-    .finance-container {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .finance-info,
-    .finance-form {
-        padding: 1.5rem;
-    }
-
-    .finance-info h2 {
-        font-size: 1.5rem;
-    }
-
-    .benefits-list li {
-        font-size: 1rem;
-    }
-}
-
 /* Sell Section */
 .sell-section {
     padding: 4rem 5%;
@@ -529,23 +574,6 @@ body {
     outline: none;
 }
 
-/* Responsividade adicional para a página de venda */
-@media (max-width: 768px) {
-    .sell-container {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .sell-info,
-    .sell-form {
-        padding: 1.5rem;
-    }
-
-    .sell-form h3 {
-        font-size: 1.3rem;
-    }
-}
-
 /* Contact Section */
 .contact-section {
     padding: 2rem;
@@ -601,43 +629,6 @@ body {
     margin: 0;
     color: #666;
     line-height: 1.4;
-}
-
-/* Media queries para responsividade */
-@media (max-width: 992px) {
-    .contact-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .contact-info {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .contact-section {
-        padding: 1rem;
-    }
-    
-    .info-item {
-        padding: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .contact-info {
-        grid-template-columns: 1fr;
-    }
-    
-    .info-item {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .info-item i {
-        margin-bottom: 0.5rem;
-    }
 }
 
 /* Login Page */
@@ -714,56 +705,6 @@ body {
 
 .back-link:hover {
     color: var(--primary-color);
-}
-
-/* Responsividade para login */
-@media (max-width: 480px) {
-    .login-container {
-        padding: 1rem;
-    }
-
-    .login-box {
-        padding: 1.5rem;
-    }
-}
-
-/* Admin Login Button */
-.admin-login {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--dark-color);
-    color: var(--light-color);
-    padding: 0.8rem 1.5rem;
-    border-radius: 4px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    opacity: 0.8;
-    transition: all 0.3s;
-    z-index: 100;
-}
-
-.admin-login:hover {
-    opacity: 1;
-    transform: translateY(-2px);
-}
-
-.admin-login i {
-    font-size: 1.1rem;
-}
-
-/* Responsividade para o botão de login */
-@media (max-width: 768px) {
-    .admin-login span {
-        display: none;
-    }
-
-    .admin-login {
-        padding: 0.8rem;
-    }
 }
 
 /* Vehicles Selection */
