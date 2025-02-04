@@ -51,15 +51,12 @@ function setupMenuToggle() {
 async function loadFeaturedVehicles() {
     try {
         // Busca os 9 veículos mais recentes usando sort por dataCadastro decrescente
-        const response = await fetch('/api/vehicles?limit=9&sort=-dataCadastro');
+        const response = await fetch('/api/vehicles?limit=9&sort=-dataCadastro&status=disponivel');
         if (!response.ok) throw new Error('Erro ao carregar veículos');
         
         const data = await response.json();
-        
-        // Se data for um array, usa ele diretamente, senão pega data.vehicles
         const vehicles = Array.isArray(data) ? data : data.vehicles;
         
-        // Se não houver veículos, mostra mensagem apropriada
         if (!vehicles || vehicles.length === 0) {
             const grid = document.getElementById('vehicles-grid');
             if (grid) {
