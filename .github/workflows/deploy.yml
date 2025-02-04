@@ -1,4 +1,5 @@
-name: Deploy to DigitalOcean
+name: Deploy
+
 on:
   push:
     branches: [ main ]
@@ -7,17 +8,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - name: Deploy to Digital Ocean
         uses: appleboy/ssh-action@master
         with:
-          host: 167.172.139.129
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /var/www/luizautomoveis
-            git fetch origin main
-            git reset --hard origin/main
-            npm install --production
-            pm2 restart luizautomoveis || pm2 start server.js --name luizautomoveis 
+            cd /var/www/LuizAuto
+            git stash
+            git pull origin main
+            npm install
+            mkdir -p public/uploads/vehicles
+            chmod -R 755 public/uploads
+            chown -R www-data:www-data public/uploads
+            pm2 restart luizauto || pm2 start server.js --name luizauto
+            pm2 save 

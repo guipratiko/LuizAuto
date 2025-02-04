@@ -27,31 +27,25 @@ const vehicleSchema = new mongoose.Schema({
     },
     combustivel: {
         type: String,
-        required: true,
-        enum: ['Flex', 'Gasolina', 'Álcool', 'Diesel', 'Elétrico', 'Híbrido']
+        required: true
     },
     transmissao: {
         type: String,
-        required: true,
-        enum: ['Manual', 'Automático', 'CVT', 'Semi-automático']
+        required: true
+    },
+    finalPlaca: {
+        type: Number,
+        required: true
     },
     descricao: {
         type: String,
         required: true
     },
-    fotos: [{
-        type: String
-    }],
+    fotos: [String],
     status: {
         type: String,
         enum: ['disponivel', 'vendido', 'reservado'],
         default: 'disponivel'
-    },
-    finalPlaca: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 9
     },
     dataCadastro: {
         type: Date,

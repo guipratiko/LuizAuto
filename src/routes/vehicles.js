@@ -8,44 +8,20 @@ const fs = require('fs');
 
 // Configuração do Multer para upload de imagens
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'public/images/vehicles';
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/vehicles')
     },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '-'));
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname))
     }
 });
 
-const upload = multer({
-    storage: storage,
-    limits: {
-        files: 10, // Máximo de 10 arquivos
-        fileSize: 20 * 1024 * 1024 // 20MB
-    },
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|webp/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-
-        if (extname && mimetype) {
-            return cb(null, true);
-        }
-        cb(new Error('Apenas imagens são permitidas!'));
-    }
-});
+const upload = multer({ storage: storage });
 
 // Listar todos os veículos
 router.get('/', async (req, res) => {
     try {
-        const query = {};
-        if (req.query.status) {
-            query.status = req.query.status;
-        }
-        const vehicles = await Vehicle.find(query).sort('-dataCadastro');
+        const vehicles = await Vehicle.find().sort('-dataCadastro');
         res.json(vehicles);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -65,43 +41,30 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Criar novo veículo
+// Criar novo veículo (protegido)
 router.post('/', verificarToken, upload.array('fotos', 10), async (req, res) => {
     try {
         const vehicleData = req.body;
-        vehicleData.fotos = req.files.map(file => `/images/vehicles/${file.filename}`);
+        if (req.files) {
+            vehicleData.fotos = req.files.map(file => `/uploads/vehicles/${file.filename}`);
+        }
         
         const vehicle = new Vehicle(vehicleData);
         await vehicle.save();
         res.status(201).json(vehicle);
     } catch (error) {
-        // Remove as imagens se houver erro no cadastro
-        if (req.files) {
-            req.files.forEach(file => {
-                fs.unlinkSync(file.path);
-            });
-        }
         res.status(400).json({ message: error.message });
     }
 });
 
-// Atualizar veículo
+// Atualizar veículo (protegido)
 router.put('/:id', verificarToken, upload.array('fotos', 10), async (req, res) => {
     try {
         const vehicleData = req.body;
-        const oldVehicle = await Vehicle.findById(req.params.id);
-
         if (req.files && req.files.length > 0) {
-            // Remove imagens antigas
-            oldVehicle.fotos.forEach(foto => {
-                const filePath = path.join(__dirname, '../../public', foto);
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                }
-            });
-            vehicleData.fotos = req.files.map(file => `/images/vehicles/${file.filename}`);
+            vehicleData.fotos = req.files.map(file => `/uploads/vehicles/${file.filename}`);
         }
-
+        
         const vehicle = await Vehicle.findByIdAndUpdate(
             req.params.id,
             vehicleData,
@@ -113,22 +76,9 @@ router.put('/:id', verificarToken, upload.array('fotos', 10), async (req, res) =
     }
 });
 
-// Excluir veículo
+// Excluir veículo (protegido)
 router.delete('/:id', verificarToken, async (req, res) => {
     try {
-        const vehicle = await Vehicle.findById(req.params.id);
-        if (!vehicle) {
-            return res.status(404).json({ message: 'Veículo não encontrado' });
-        }
-
-        // Remove as imagens do veículo
-        vehicle.fotos.forEach(foto => {
-            const filePath = path.join(__dirname, '../../public', foto);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        });
-
         await Vehicle.findByIdAndDelete(req.params.id);
         res.json({ message: 'Veículo excluído com sucesso' });
     } catch (error) {
