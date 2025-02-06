@@ -57,4 +57,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function updateMainImage(src) {
     document.querySelector('.main-image img').src = src;
+}
+
+function updateMetaTags(metaTags) {
+    document.title = metaTags.title;
+    document.querySelector('meta[name="description"]').setAttribute('content', metaTags.description);
+    document.querySelector('meta[property="og:title"]').setAttribute('content', metaTags.title);
+    document.querySelector('meta[property="og:description"]').setAttribute('content', metaTags.description);
+    document.querySelector('meta[property="og:url"]').setAttribute('content', metaTags.url);
+    document.querySelector('meta[property="og:image"]').setAttribute('content', metaTags.image);
 } 

@@ -82,16 +82,18 @@ function displayVehicles(vehicles) {
     if (!grid) return;
 
     grid.innerHTML = vehicles.map(vehicle => `
-        <div class="vehicle-card" onclick="showVehicleDetails('${vehicle._id}')">
-            <img src="${vehicle.fotos[0] || '/images/no-image.svg'}" alt="${vehicle.marca} ${vehicle.modelo}">
-            <div class="vehicle-info">
-                <h3>${vehicle.marca} ${vehicle.modelo}</h3>
-                <p class="price">R$ ${vehicle.preco.toLocaleString('pt-BR')}</p>
-                <div class="specs">
-                    <span><i class="fas fa-calendar"></i> ${vehicle.ano}</span>
-                    <span><i class="fas fa-tachometer-alt"></i> ${vehicle.quilometragem.toLocaleString('pt-BR')} km</span>
+        <div class="vehicle-card">
+            <a href="/veiculo/${vehicle.slug}/${vehicle._id}" class="vehicle-link">
+                <img src="${vehicle.fotos[0] || '/images/no-image.svg'}" alt="${vehicle.marca} ${vehicle.modelo}">
+                <div class="vehicle-info">
+                    <h3>${vehicle.marca} ${vehicle.modelo}</h3>
+                    <p class="price">R$ ${vehicle.preco.toLocaleString('pt-BR')}</p>
+                    <div class="specs">
+                        <span><i class="fas fa-calendar"></i> ${vehicle.ano}</span>
+                        <span><i class="fas fa-tachometer-alt"></i> ${vehicle.quilometragem.toLocaleString('pt-BR')} km</span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     `).join('');
 }

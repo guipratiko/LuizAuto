@@ -36,11 +36,27 @@ const upload = multer({
     }
 });
 
+// Função para gerar slug amigável
+function generateSlug(text) {
+    return text
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+}
+
 // Listar todos os veículos
 router.get('/', async (req, res) => {
     try {
         const vehicles = await Vehicle.find().sort('-dataCadastro');
-        res.json(vehicles);
+        const vehiclesWithSlug = vehicles.map(vehicle => {
+            const doc = vehicle.toObject();
+            doc.slug = `${generateSlug(vehicle.marca)}-${generateSlug(vehicle.modelo)}-${vehicle.ano}`;
+            return doc;
+        });
+        res.json(vehiclesWithSlug);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -165,7 +181,16 @@ router.get('/:marca/:modelo/:ano/:id', async (req, res) => {
         if (!vehicle) {
             return res.status(404).json({ message: 'Veículo não encontrado' });
         }
-        res.json(vehicle);
+
+        // Adicionar meta tags específicas para o veículo
+        const metaTags = {
+            title: `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano} - Luiz Automóveis`,
+            description: `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}, ${vehicle.quilometragem}km, ${vehicle.combustivel}, ${vehicle.cor}. Confira!`,
+            url: `https://luizautomoveis.com/veiculo/${generateSlug(vehicle.marca)}/${generateSlug(vehicle.modelo)}/${vehicle.ano}/${vehicle._id}`,
+            image: vehicle.fotos[0] || 'https://luizautomoveis.com/images/logo.png'
+        };
+
+        res.json({ vehicle, metaTags });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
