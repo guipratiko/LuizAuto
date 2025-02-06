@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     setupMenuToggle();
     loadFeaturedVehicles();
+    addSchemaOrg();
 });
 
 function setupMenuToggle() {
@@ -269,4 +270,49 @@ document.addEventListener('keydown', (e) => {
             closeDetailsModal();
         }
     }
-}); 
+});
+
+// Adicionar Schema.org
+function addSchemaOrg() {
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "AutoDealer",
+        "name": "Luiz Automóveis",
+        "image": "https://luizautomoveis.com/images/logo.png",
+        "description": "A melhor loja de carros seminovos de Goiânia",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Av. T-63, 2074",
+            "addressLocality": "Goiânia",
+            "addressRegion": "GO",
+            "postalCode": "74250-320",
+            "addressCountry": "BR"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": -16.714476062178704,
+            "longitude": -49.27808514646048
+        },
+        "url": "https://luizautomoveis.com",
+        "telephone": "+556232470376",
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "09:00",
+                "closes": "18:00"
+            },
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Saturday",
+                "opens": "09:00",
+                "closes": "14:00"
+            }
+        ]
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(schema);
+    document.head.appendChild(script);
+} 

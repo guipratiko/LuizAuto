@@ -6,6 +6,7 @@ const path = require('path');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const Contato = require('./src/models/Contato');
+const compression = require('compression');
 
 const app = express();
 
@@ -29,6 +30,22 @@ app.use((req, res, next) => {
     }
     if (req.path.endsWith('.jpg') || req.path.endsWith('.jpeg')) {
         res.type('image/jpeg');
+    }
+    next();
+});
+
+// Adicionar compressão gzip
+app.use(compression());
+
+// Configurar headers de cache
+app.use((req, res, next) => {
+    // Cache para arquivos estáticos
+    if (req.url.match(/\.(css|js|jpg|jpeg|png|gif|ico|svg)$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 ano
+    }
+    // Cache para páginas HTML
+    else if (req.url.match(/\.html$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=0'); // Sem cache
     }
     next();
 });
