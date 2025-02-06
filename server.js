@@ -45,12 +45,7 @@ app.use('/api/vendas', vendasRoutes);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// Rota para página de detalhes do veículo
-app.get('/veiculo/:id', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'veiculo.html'));
-});
-
-// Rotas para as páginas estáticas
+// Manter apenas as rotas estáticas básicas
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
