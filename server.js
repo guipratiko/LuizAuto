@@ -180,27 +180,42 @@ app.delete('/api/contatos/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Rota de autenticação
+// Rota de login
 app.post('/api/login', (req, res) => {
-    const { email, senha } = req.body;
+    const { username, senha } = req.body;
 
-    // Credenciais fixas para teste
-    const credenciaisValidas = {
-        email: 'admin@premiummotors.com',
-        senha: 'admin123'
-    };
+    // Lista de credenciais válidas
+    const credenciaisValidas = [
+        {
+            username: 'agenciavx',
+            senha: '@genci4vx!'
+        },
+        {
+            username: 'pamella',
+            senha: 'Pb@100502'
+        },
+        {
+            username: 'luiz',
+            senha: '976421Lp'
+        }
+    ];
 
-    if (email === credenciaisValidas.email && senha === credenciaisValidas.senha) {
+    // Verificar credenciais (ignorando case no username)
+    const usuarioValido = credenciaisValidas.find(
+        cred => cred.username.toLowerCase() === username.toLowerCase() && cred.senha === senha
+    );
+
+    if (usuarioValido) {
         // Gerar token JWT
         const token = jwt.sign(
-            { email: credenciaisValidas.email },
+            { username: usuarioValido.username }, // mantém o username original no token
             process.env.JWT_SECRET || 'sua_chave_secreta',
             { expiresIn: '24h' }
         );
 
         res.json({ token });
     } else {
-        res.status(401).json({ mensagem: 'Credenciais inválidas' });
+        res.status(401).json({ message: 'Usuário ou senha incorretos' });
     }
 });
 

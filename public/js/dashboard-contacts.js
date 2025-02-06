@@ -42,38 +42,28 @@ async function loadContacts() {
 }
 
 function displayContacts(contatos) {
-    const tbody = document.querySelector('.data-table tbody');
-    if (!tbody) return;
-
-    if (!contatos.length) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center">Nenhuma mensagem encontrada</td>
-            </tr>
-        `;
-        return;
-    }
-
+    const tbody = document.getElementById('contacts-table-body');
+    
     tbody.innerHTML = contatos.map(contato => `
         <tr>
+            <td>${new Date(contato.dataEnvio).toLocaleDateString('pt-BR')}</td>
             <td>${contato.nome}</td>
             <td>${contato.email}</td>
             <td>${contato.telefone}</td>
             <td>${contato.assunto || '-'}</td>
-            <td>${new Date(contato.dataEnvio).toLocaleDateString('pt-BR')}</td>
             <td>
                 <span class="status-badge ${getStatusClass(contato.status)}">
                     ${contato.status}
                 </span>
             </td>
             <td class="actions">
-                <button onclick="viewMessage('${contato._id}')" class="btn-action">
+                <button onclick="viewMessage('${contato._id}')" class="btn-icon" title="Ver mensagem">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button onclick="updateStatus('${contato._id}')" class="btn-action">
+                <button onclick="markAsRead('${contato._id}')" class="btn-icon" title="Marcar como lido">
                     <i class="fas fa-check"></i>
                 </button>
-                <button onclick="deleteContact('${contato._id}')" class="btn-action delete">
+                <button onclick="deleteContact('${contato._id}')" class="btn-icon" title="Excluir">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -82,12 +72,12 @@ function displayContacts(contatos) {
 }
 
 function getStatusClass(status) {
-    const classes = {
-        'Não lido': 'pending',
-        'Lido': 'processing',
-        'Respondido': 'completed'
-    };
-    return classes[status] || 'pending';
+    switch (status) {
+        case 'Não lido': return 'status-unread';
+        case 'Lido': return 'status-read';
+        case 'Respondido': return 'status-replied';
+        default: return '';
+    }
 }
 
 async function viewMessage(id) {

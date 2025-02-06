@@ -24,10 +24,14 @@ const financiamentoSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pendente', 'aprovado', 'reprovado'],
-        default: 'pendente'
+        enum: ['Pendente', 'Em análise', 'Aprovado', 'Recusado'],
+        default: 'Pendente'
     },
-    createdAt: {
+    dataEnvio: {
+        type: Date,
+        default: Date.now
+    },
+    dataAtualizacao: {
         type: Date,
         default: Date.now
     }

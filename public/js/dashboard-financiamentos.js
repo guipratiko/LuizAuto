@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     setupSidebar();
-    loadVendas();
+    loadFinanciamentos();
     setupLogout();
 });
 
@@ -21,10 +21,10 @@ function setupSidebar() {
     });
 }
 
-async function loadVendas() {
+async function loadFinanciamentos() {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('/api/vendas', {
+        const response = await fetch('/api/financiamentos', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -32,43 +32,44 @@ async function loadVendas() {
 
         if (!response.ok) throw new Error('Erro ao carregar dados');
 
-        const vendas = await response.json();
-        displayVendas(vendas);
+        const financiamentos = await response.json();
+        displayFinanciamentos(financiamentos);
     } catch (error) {
         console.error('Erro:', error);
-        alert('Erro ao carregar solicitações de venda');
+        alert('Erro ao carregar solicitações de financiamento');
     }
 }
 
-function displayVendas(vendas) {
-    const tbody = document.getElementById('vendas-table-body');
+function displayFinanciamentos(financiamentos) {
+    const tbody = document.getElementById('financiamentos-table-body');
     tbody.innerHTML = '';
 
-    vendas.forEach(venda => {
+    financiamentos.forEach(financiamento => {
         const tr = document.createElement('tr');
-        const data = new Date(venda.dataEnvio).toLocaleDateString('pt-BR');
+        const data = new Date(financiamento.dataEnvio).toLocaleDateString('pt-BR');
         
         tr.innerHTML = `
             <td>${data}</td>
-            <td>${venda.nome}</td>
-            <td>${venda.marca} ${venda.modelo} (${venda.ano})</td>
+            <td>${financiamento.nome}</td>
+            <td>${financiamento.veiculo_id ? `${financiamento.veiculo_id.marca} ${financiamento.veiculo_id.modelo}` : 'N/A'}</td>
             <td>
-                <div>📱 ${venda.telefone}</div>
-                <div>📧 ${venda.email}</div>
+                <div>📱 ${financiamento.telefone}</div>
+                <div>📧 ${financiamento.email}</div>
             </td>
+            <td>R$ ${parseFloat(financiamento.entrada).toLocaleString('pt-BR')}</td>
             <td>
-                <select onchange="updateStatus('${venda._id}', this.value)" class="status-select ${venda.status.toLowerCase()}">
-                    <option value="Pendente" ${venda.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                    <option value="Em análise" ${venda.status === 'Em análise' ? 'selected' : ''}>Em análise</option>
-                    <option value="Aprovada" ${venda.status === 'Aprovada' ? 'selected' : ''}>Aprovada</option>
-                    <option value="Recusada" ${venda.status === 'Recusada' ? 'selected' : ''}>Recusada</option>
+                <select onchange="updateStatus('${financiamento._id}', this.value)" class="status-select ${financiamento.status.toLowerCase()}">
+                    <option value="Pendente" ${financiamento.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                    <option value="Em análise" ${financiamento.status === 'Em análise' ? 'selected' : ''}>Em análise</option>
+                    <option value="Aprovado" ${financiamento.status === 'Aprovado' ? 'selected' : ''}>Aprovado</option>
+                    <option value="Recusado" ${financiamento.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
                 </select>
             </td>
-            <td>
-                <button onclick="viewDetails('${venda._id}')" class="btn-icon">
+            <td class="actions">
+                <button onclick="viewDetails('${financiamento._id}')" class="btn-icon" title="Ver detalhes">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button onclick="deleteVenda('${venda._id}')" class="btn-icon delete">
+                <button onclick="deleteFinanciamento('${financiamento._id}')" class="btn-icon delete" title="Excluir">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -81,7 +82,7 @@ function displayVendas(vendas) {
 async function updateStatus(id, status) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/vendas/${id}/status`, {
+        const response = await fetch(`/api/financiamentos/${id}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -96,20 +97,19 @@ async function updateStatus(id, status) {
         }
 
         const data = await response.json();
-        // Recarregar a tabela após atualização bem-sucedida
-        loadVendas(); // Usando a função existente ao invés de atualizarTabelaVendas
+        loadFinanciamentos(); // Recarrega a lista após atualização
     } catch (error) {
         console.error('Erro:', error);
         alert('Erro ao atualizar status: ' + error.message);
     }
 }
 
-async function deleteVenda(id) {
+async function deleteFinanciamento(id) {
     if (!confirm('Tem certeza que deseja excluir esta solicitação?')) return;
 
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/vendas/${id}`, {
+        const response = await fetch(`/api/financiamentos/${id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -118,7 +118,7 @@ async function deleteVenda(id) {
 
         if (!response.ok) throw new Error('Erro ao excluir solicitação');
         
-        loadVendas(); // Recarrega a lista
+        loadFinanciamentos(); // Recarrega a lista
     } catch (error) {
         console.error('Erro:', error);
         alert('Erro ao excluir solicitação');
@@ -133,4 +133,10 @@ function setupLogout() {
         localStorage.removeItem('token');
         window.location.href = '/login';
     });
+}
+
+// Função para visualizar detalhes (implementar conforme necessário)
+function viewDetails(id) {
+    // Implementar visualização de detalhes
+    console.log('Ver detalhes do financiamento:', id);
 } 

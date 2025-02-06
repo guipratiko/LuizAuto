@@ -8,6 +8,7 @@ console.log('Multer carregado');
 const path = require('path');
 const fs = require('fs');
 const Vehicle = require('../models/Vehicle');
+const Atividade = require('../models/Atividade');
 console.log('Model Vehicle carregado');
 
 const verificarToken = require('../middleware/auth');
@@ -68,9 +69,20 @@ router.post('/', verificarToken, upload.array('fotos', 10), async (req, res) => 
         
         const vehicle = new Vehicle(vehicleData);
         await vehicle.save();
+
+        // Registrar a atividade
+        const novaAtividade = new Atividade({
+            username: req.user.username,
+            acao: 'Adicionou um novo veículo',
+            tipo: 'veiculo',
+            detalhes: `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`
+        });
+        await novaAtividade.save();
+
         res.status(201).json(vehicle);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Erro ao adicionar veículo:', error);
+        res.status(500).json({ error: 'Erro ao adicionar veículo' });
     }
 });
 
@@ -97,20 +109,43 @@ router.put('/:id', verificarToken, upload.array('fotos', 10), async (req, res) =
             { new: true }
         );
         
+        // Registrar a atividade
+        const novaAtividade = new Atividade({
+            username: req.user.username,
+            acao: 'Atualizou um veículo',
+            tipo: 'veiculo',
+            detalhes: `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`
+        });
+        await novaAtividade.save();
+
         res.json(vehicle);
     } catch (error) {
-        console.error('Erro ao atualizar veículo:', error);
-        res.status(400).json({ message: error.message });
+        res.status(500).json({ error: 'Erro ao atualizar veículo' });
     }
 });
 
 // Excluir veículo (protegido)
 router.delete('/:id', verificarToken, async (req, res) => {
     try {
+        const vehicle = await Vehicle.findById(req.params.id);
+        if (!vehicle) {
+            return res.status(404).json({ error: 'Veículo não encontrado' });
+        }
+
         await Vehicle.findByIdAndDelete(req.params.id);
+
+        // Registrar a atividade
+        const novaAtividade = new Atividade({
+            username: req.user.username,
+            acao: 'Excluiu um veículo',
+            tipo: 'veiculo',
+            detalhes: `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`
+        });
+        await novaAtividade.save();
+
         res.json({ message: 'Veículo excluído com sucesso' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ error: 'Erro ao excluir veículo' });
     }
 });
 
