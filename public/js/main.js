@@ -123,29 +123,43 @@ async function showVehicleDetails(id) {
             `).join('');
         }
 
-        // Preencher especificações
-        document.getElementById('spec-list').innerHTML = `
-            <div class="spec-row">
-                <div class="spec-item">
-                    <i class="fas fa-calendar"></i>
-                    <span>Ano: ${vehicle.ano}</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Quilometragem: ${vehicle.quilometragem.toLocaleString('pt-BR')} km</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-gas-pump"></i>
-                    <span>Combustível: ${vehicle.combustivel}</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Transmissão: ${vehicle.transmissao}</span>
-                </div>
-                <div class="spec-item">
-                    <i class="fas fa-palette"></i>
-                    <span>Cor: ${vehicle.cor}</span>
-                </div>
+        // Atualizar a lista de especificações
+        const specList = document.getElementById('spec-list');
+        specList.innerHTML = `
+            <div class="spec-item">
+                <i class="fas fa-car"></i>
+                <span>Marca/Modelo:</span>
+                <strong>${vehicle.marca} ${vehicle.modelo}</strong>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-calendar"></i>
+                <span>Ano:</span>
+                <strong>${vehicle.ano}</strong>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Quilometragem:</span>
+                <strong>${vehicle.quilometragem.toLocaleString('pt-BR')} km</strong>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-palette"></i>
+                <span>Cor:</span>
+                <strong>${vehicle.cor}</strong>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-gas-pump"></i>
+                <span>Combustível:</span>
+                <strong>${vehicle.combustivel}</strong>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-cog"></i>
+                <span>Transmissão:</span>
+                <strong>${vehicle.transmissao}</strong>
+            </div>
+            <div class="spec-item">
+                <i class="fas fa-hashtag"></i>
+                <span>Final da Placa:</span>
+                <strong>${vehicle.finalPlaca}</strong>
             </div>
         `;
 
