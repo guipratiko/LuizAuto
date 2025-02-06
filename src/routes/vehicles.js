@@ -158,4 +158,17 @@ router.get('/test-upload', (req, res) => {
     });
 });
 
+// Rota para detalhes do veículo com URL amigável
+router.get('/:marca/:modelo/:ano/:id', async (req, res) => {
+    try {
+        const vehicle = await Vehicle.findById(req.params.id);
+        if (!vehicle) {
+            return res.status(404).json({ message: 'Veículo não encontrado' });
+        }
+        res.json(vehicle);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router; 
