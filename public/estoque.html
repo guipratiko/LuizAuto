@@ -28,6 +28,14 @@
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .vehicles-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -58,25 +66,7 @@
         <div class="filters">
             <select id="filter-marca" class="filter-select">
                 <option value="">Todas as Marcas</option>
-                <option value="Fiat">Fiat</option>
-                <option value="Chevrolet">Chevrolet</option>
-                <option value="Volkswagen">Volkswagen</option>
-                <option value="Ford">Ford</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Honda">Honda</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Renault">Renault</option>
-                <option value="Nissan">Nissan</option>
-                <option value="Jeep">Jeep</option>
-                <option value="Peugeot">Peugeot</option>
-                <option value="Citroën">Citroën</option>
-                <option value="Mitsubishi">Mitsubishi</option>
-                <option value="Kia">Kia</option>
-                <option value="BMW">BMW</option>
-                <option value="Mercedes-Benz">Mercedes-Benz</option>
-                <option value="Audi">Audi</option>
-                <option value="Volvo">Volvo</option>
-                <option value="Land Rover">Land Rover</option>
+                <!-- As marcas serão preenchidas via JavaScript -->
             </select>
 
             <select id="filter-ano" class="filter-select">

@@ -1,11 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    loadMarcasDisponiveis();
     loadCoresDisponiveis();
     setupFilters();
     loadVehicles();
 });
 
 let currentPage = 1;
-const itemsPerPage = 9;
+const ITEMS_PER_PAGE = 20;
 
 // Função para carregar cores disponíveis
 async function loadCoresDisponiveis() {
@@ -31,6 +32,30 @@ async function loadCoresDisponiveis() {
     }
 }
 
+// Adicionar esta nova função
+async function loadMarcasDisponiveis() {
+    try {
+        const response = await fetch('/api/vehicles');
+        const data = await response.json();
+        const vehicles = Array.isArray(data) ? data : data.vehicles || [];
+
+        // Extrair marcas únicas dos veículos
+        const marcas = [...new Set(vehicles.map(v => v.marca))].filter(marca => marca);
+        marcas.sort(); // Ordenar marcas alfabeticamente
+
+        // Preencher select de marcas
+        const marcaSelect = document.getElementById('filter-marca');
+        if (marcaSelect) {
+            marcaSelect.innerHTML = `
+                <option value="">Todas as Marcas</option>
+                ${marcas.map(marca => `<option value="${marca}">${marca}</option>`).join('')}
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar marcas:', error);
+    }
+}
+
 // Configuração dos filtros
 function setupFilters() {
     // Preencher anos dinamicamente
@@ -53,9 +78,10 @@ function setupFilters() {
 }
 
 // Carregar veículos com filtros
-async function loadVehicles() {
+async function loadVehicles(page = 1) {
     try {
         const params = new URLSearchParams();
+        currentPage = page;
         
         // Pegar valores dos filtros
         const marca = document.getElementById('filter-marca').value;
@@ -87,20 +113,17 @@ async function loadVehicles() {
             }
         }
 
-        // Paginação e ordenação
-        params.append('page', currentPage);
-        params.append('limit', itemsPerPage);
+        // Garantir que o limite seja sempre 20
+        params.set('limit', ITEMS_PER_PAGE);
+        params.set('page', currentPage);
         params.append('sort', '-dataCadastro');
 
-        // Fazer a requisição
         const response = await fetch(`/api/vehicles?${params.toString()}`);
         if (!response.ok) {
             throw new Error('Erro na requisição');
         }
 
         const data = await response.json();
-
-        // Filtrar os resultados no lado do cliente se necessário
         let filteredVehicles = Array.isArray(data) ? data : data.vehicles || [];
         
         // Aplicar filtros manualmente se necessário
@@ -127,9 +150,10 @@ async function loadVehicles() {
             });
         }
 
-        // Paginação manual dos resultados filtrados
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const paginatedVehicles = filteredVehicles.slice(startIndex, startIndex + itemsPerPage);
+        // Garantir que a paginação use sempre 20 itens
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        const paginatedVehicles = filteredVehicles.slice(start, end);
 
         // Exibir resultados filtrados
         displayVehicles(paginatedVehicles);
@@ -177,7 +201,7 @@ function displayVehicles(vehicles) {
 }
 
 function updatePagination(total) {
-    const totalPages = Math.ceil(total / itemsPerPage);
+    const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
     const pagination = document.getElementById('pagination');
     if (!pagination || totalPages <= 1) return;
 

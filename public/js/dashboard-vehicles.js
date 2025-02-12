@@ -13,6 +13,52 @@ const itemsPerPage = 12;
 let selectedVehicle = null;
 let uploadedPhotos = [];
 
+// Mover estas funções para o escopo global
+let draggedItem = null;
+
+function addDragListeners(preview) {
+    preview.addEventListener('dragstart', handleDragStart);
+    preview.addEventListener('dragend', handleDragEnd);
+    preview.addEventListener('dragover', handleDragOver);
+    preview.addEventListener('dragleave', handleDragLeave);
+    preview.addEventListener('drop', handleDrop);
+}
+
+function handleDragStart(e) {
+    draggedItem = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.index);
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDragLeave(e) {
+    e.currentTarget.style.transform = '';
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    updatePreviewOrder();
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    updatePreviewOrder();
+}
+
+function updatePreviewOrder() {
+    const previews = document.querySelectorAll('.preview-item');
+    previews.forEach((preview, index) => {
+        preview.dataset.index = index;
+        preview.querySelector('.preview-order').textContent = index + 1;
+    });
+}
+
 function checkAuth() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -82,72 +128,60 @@ function setupForm() {
         return;
     }
 
-    // Drag and drop
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        handleFiles(files);
-    });
-
-    fotosInput.addEventListener('change', (e) => {
-        handleFiles(e.target.files);
-    });
-
-    function handleFiles(files) {
-        if (!files) return;
-        
-        if (files.length > 10) {
-            alert('Máximo de 10 imagens permitidas');
-            return;
-        }
-
-        // Limpa preview anterior
-        previewArea.innerHTML = '';
-
-        Array.from(files).forEach(file => {
-            if (file.size > 20 * 1024 * 1024) {
-                alert(`Arquivo ${file.name} excede 20MB`);
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const preview = document.createElement('div');
-                preview.className = 'preview-item';
-                preview.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <button type="button" class="remove-btn">&times;</button>
-                `;
-                previewArea.appendChild(preview);
-
-                preview.querySelector('.remove-btn').addEventListener('click', () => {
-                    preview.remove();
-                });
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        console.log('Enviando formulário...');
-
-        const formData = new FormData(e.target);
+    // Modificar o envio do formulário para lidar com a ordem das fotos
+    async function handleVehicleFormSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData();
+        const vehicleId = form.dataset.vehicleId;
+        const token = localStorage.getItem('token');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('/api/vehicles', {
-                method: 'POST',
+            // Adicionar campos básicos do formulário
+            for (let field of form.elements) {
+                if (field.name && field.name !== 'fotos') {
+                    formData.append(field.name, field.value);
+                }
+            }
+
+            // Coletar todas as fotos na ordem correta
+            const previews = document.querySelectorAll('.preview-item');
+            const existingPhotos = [];
+            const newFiles = Array.from(form.fotos.files || []);
+
+            // Primeiro, coletar URLs das fotos existentes na ordem atual
+            previews.forEach(preview => {
+                if (preview.dataset.existingPhoto === 'true') {
+                    existingPhotos.push(preview.dataset.photoUrl);
+                }
+            });
+
+            // Depois, adicionar novas fotos na ordem atual
+            previews.forEach(preview => {
+                if (preview.dataset.existingPhoto !== 'true') {
+                    const fileName = preview.dataset.fileName;
+                    const file = newFiles.find(f => f.name === fileName);
+                    if (file) {
+                        formData.append('fotos', file);
+                    }
+                }
+            });
+
+            // Adicionar array de fotos existentes e suas posições
+            formData.append('fotosExistentes', JSON.stringify(existingPhotos));
+
+            // Log para debug
+            console.log('Enviando fotos existentes:', existingPhotos);
+            console.log('Enviando novas fotos:', newFiles);
+
+            const url = vehicleId 
+                ? `/api/vehicles/${vehicleId}`
+                : '/api/vehicles';
+            
+            const method = vehicleId ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
@@ -155,20 +189,32 @@ function setupForm() {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error('Erro ao salvar veículo');
             }
 
-            const data = await response.json();
-            console.log('Sucesso:', data);
-            alert('Veículo cadastrado com sucesso!');
+            const result = await response.json();
+            console.log('Resposta do servidor:', result);
+
+            // Fechar modal e recarregar lista
+            const modal = document.getElementById('vehicle-modal');
+            modal.style.display = 'none';
+            modal.classList.remove('active');
             resetForm();
-            if (e.target.closest('.modal')) e.target.closest('.modal').classList.remove('active');
             loadVehicles();
+            
+            alert(vehicleId ? 'Veículo atualizado com sucesso!' : 'Veículo cadastrado com sucesso!');
         } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao cadastrar veículo. Por favor, tente novamente.');
+            console.error('Erro ao salvar veículo:', error);
+            alert('Erro ao salvar veículo. Por favor, tente novamente.');
         }
-    });
+    }
+
+    // Event Listeners
+    form.addEventListener('submit', handleVehicleFormSubmit);
+    fotosInput.addEventListener('change', (e) => handleFiles(e.target.files, previewArea));
+    
+    // Drag and drop na área de upload
+    setupUploadArea(uploadArea, previewArea);
 
     // Adicionar opções de cores
     const cores = [
@@ -345,57 +391,142 @@ async function editVehicle(id) {
 
         if (!response.ok) throw new Error('Erro ao carregar veículo');
 
-        selectedVehicle = await response.json();
-        fillForm(selectedVehicle);
+        const vehicle = await response.json();
+        console.log('Dados do veículo recebidos:', vehicle); // Debug
+
+        // Garantir que vehicle.fotos seja um array
+        if (!Array.isArray(vehicle.fotos)) {
+            vehicle.fotos = vehicle.fotos ? [vehicle.fotos] : [];
+        }
+
+        fillForm(vehicle);
+        
+        const form = document.getElementById('vehicle-form');
+        form.dataset.vehicleId = vehicle._id;
+        
         document.getElementById('modal-title').textContent = 'Editar Veículo';
+        document.getElementById('vehicle-modal').style.display = 'block';
         document.getElementById('vehicle-modal').classList.add('active');
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro ao carregar veículo:', error);
         alert('Erro ao carregar dados do veículo');
     }
 }
 
 async function fillForm(vehicle) {
     const form = document.getElementById('vehicle-form');
+    const previewArea = document.getElementById('upload-preview');
+    const uploadArea = document.getElementById('upload-area');
+
+    // Preencher campos do formulário
     Object.keys(vehicle).forEach(key => {
         const input = form.elements[key];
-        if (input) input.value = vehicle[key];
+        if (input && key !== 'fotos') {
+            input.value = vehicle[key];
+        }
     });
 
-    uploadedPhotos = vehicle.fotos || [];
-    
-    // Limpar o input de fotos
-    document.getElementById('fotos').value = '';
-    
-    // Mostrar imagens existentes
-    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-    imagePreviewContainer.innerHTML = '';
-    
-    if (vehicle.fotos && vehicle.fotos.length > 0) {
-        const existingImagesDiv = document.createElement('div');
-        existingImagesDiv.className = 'existing-images';
-        existingImagesDiv.innerHTML = '<h4>Imagens Atuais:</h4>';
+    // Limpar área de preview
+    previewArea.innerHTML = '';
+
+    // Mostrar fotos existentes
+    if (vehicle.fotos && Array.isArray(vehicle.fotos)) {
+        const validPhotos = vehicle.fotos.filter(foto => foto && foto.trim() !== '');
         
-        vehicle.fotos.forEach((foto, index) => {
-            const imgContainer = document.createElement('div');
-            imgContainer.className = 'image-container';
-            
-            const img = document.createElement('img');
-            img.src = foto;
-            img.className = 'thumbnail';
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '❌';
-            deleteBtn.className = 'delete-image';
-            deleteBtn.onclick = () => removeImage(index);
-            
-            imgContainer.appendChild(img);
-            imgContainer.appendChild(deleteBtn);
-            existingImagesDiv.appendChild(imgContainer);
+        // Debug
+        console.log('Total de fotos válidas:', validPhotos.length);
+        console.log('Fotos:', validPhotos);
+
+        // Criar previews para cada foto
+        validPhotos.forEach((foto, index) => {
+            createPhotoPreview(foto, index, previewArea);
         });
-        
-        imagePreviewContainer.appendChild(existingImagesDiv);
     }
+
+    // Limpar input de arquivo
+    const fotosInput = document.getElementById('fotos');
+    if (fotosInput) {
+        fotosInput.value = '';
+    }
+
+    // Reconfigurar área de upload
+    setupUploadArea(uploadArea, previewArea);
+}
+
+// Função auxiliar para criar preview de foto
+function createPhotoPreview(foto, index, container) {
+    const preview = document.createElement('div');
+    preview.className = 'preview-item';
+    preview.draggable = true;
+    preview.dataset.index = index;
+    preview.dataset.existingPhoto = 'true';
+    preview.dataset.photoUrl = foto;
+    
+    preview.innerHTML = `
+        <div class="preview-order">${index + 1}</div>
+        <img src="${foto}" 
+             alt="Preview ${index + 1}" 
+             onerror="this.src='/images/no-image.svg'"
+        >
+        <button type="button" class="remove-btn">&times;</button>
+    `;
+    
+    container.appendChild(preview);
+    
+    // Adicionar eventos
+    addDragListeners(preview);
+    
+    preview.querySelector('.remove-btn').addEventListener('click', () => {
+        preview.remove();
+        updatePreviewOrder();
+    });
+
+    return preview;
+}
+
+// Função para configurar área de upload
+function setupUploadArea(uploadArea, previewArea) {
+    if (!uploadArea || !previewArea) return;
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        handleFiles(files, previewArea);
+    });
+}
+
+// Função para lidar com arquivos
+function handleFiles(files, previewArea) {
+    if (!files || !previewArea) return;
+    
+    if (files.length > 10) {
+        alert('Máximo de 10 imagens permitidas');
+        return;
+    }
+
+    Array.from(files).forEach((file, index) => {
+        if (file.size > 20 * 1024 * 1024) {
+            alert(`Arquivo ${file.name} excede 20MB`);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const currentIndex = previewArea.children.length;
+            createPhotoPreview(e.target.result, currentIndex, previewArea);
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 // Função para remover imagem
@@ -407,40 +538,26 @@ function removeImage(index) {
     }
 }
 
-// Atualizar a função de envio do formulário
-async function handleSubmit(event) {
-    event.preventDefault();
+function openEditVehicleModal(vehicle) {
+    const form = document.getElementById('vehicle-form');
+    form.dataset.vehicleId = vehicle._id;
     
-    const formData = new FormData(event.target);
-    const vehicleId = document.getElementById('vehicleId').value;
-    
-    // Se estiver editando, adicionar fotos existentes
-    if (vehicleId && currentVehicle && currentVehicle.fotos) {
-        formData.append('fotosExistentes', JSON.stringify(currentVehicle.fotos));
-    }
-    
-    try {
-        const url = vehicleId ? 
-            `/api/vehicles/${vehicleId}` : 
-            '/api/vehicles';
-            
-        const response = await fetch(url, {
-            method: vehicleId ? 'PUT' : 'POST',
-            body: formData,
-            headers: {
-                'Authorization': `Bearer ${getToken()}`
-            }
-        });
-        
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        alert(vehicleId ? 'Veículo atualizado com sucesso!' : 'Veículo cadastrado com sucesso!');
-        closeModal();
-        loadVehicles();
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao salvar veículo');
-    }
+    // Preenche os campos do formulário
+    document.getElementById('marca').value = vehicle.marca;
+    document.getElementById('modelo').value = vehicle.modelo;
+    document.getElementById('ano').value = vehicle.ano;
+    // ... preencher outros campos ...
+
+    document.getElementById('modal-title').textContent = 'Editar Veículo';
+    openVehicleModal();
+}
+
+function openNewVehicleModal() {
+    const form = document.getElementById('vehicle-form');
+    form.dataset.vehicleId = '';
+    form.reset();
+    document.getElementById('modal-title').textContent = 'Novo Veículo';
+    openVehicleModal();
 }
 
 async function deleteVehicle(id) {
@@ -468,7 +585,10 @@ function resetForm() {
     const form = document.getElementById('vehicle-form');
     const previewArea = document.getElementById('upload-preview');
     
-    if (form) form.reset();
+    if (form) {
+        form.reset();
+        form.dataset.vehicleId = ''; // Limpar o ID do veículo
+    }
     if (previewArea) previewArea.innerHTML = '';
     selectedVehicle = null;
 }
