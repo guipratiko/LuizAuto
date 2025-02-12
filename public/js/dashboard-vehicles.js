@@ -25,24 +25,37 @@ function addDragListeners(preview) {
 }
 
 function handleDragStart(e) {
-    draggedItem = this;
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.dataset.index);
+    draggedItem = this;
 }
 
 function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    
+    const item = e.target.closest('.preview-item');
+    if (!item || item === draggedItem) return;
+
+    const container = item.parentElement;
+    const children = [...container.children];
+    const draggedIndex = children.indexOf(draggedItem);
+    const dropIndex = children.indexOf(item);
+
+    if (draggedIndex < dropIndex) {
+        item.parentNode.insertBefore(draggedItem, item.nextSibling);
+    } else {
+        item.parentNode.insertBefore(draggedItem, item);
+    }
 }
 
 function handleDragLeave(e) {
-    e.currentTarget.style.transform = '';
+    e.preventDefault();
 }
 
 function handleDrop(e) {
     e.preventDefault();
-    e.stopPropagation();
+    this.classList.remove('dragging');
     updatePreviewOrder();
 }
 
@@ -136,48 +149,34 @@ function setupForm() {
         const vehicleId = form.dataset.vehicleId;
         const token = localStorage.getItem('token');
 
-        try {
-            // Adicionar campos básicos do formulário
-            for (let field of form.elements) {
-                if (field.name && field.name !== 'fotos') {
-                    formData.append(field.name, field.value);
-                }
+        // Adicionar campos básicos
+        for (let field of form.elements) {
+            if (field.name && field.name !== 'fotos') {
+                formData.append(field.name, field.value);
             }
+        }
 
-            // Coletar todas as fotos na ordem correta
-            const previews = document.querySelectorAll('.preview-item');
-            const existingPhotos = [];
-            const newFiles = Array.from(form.fotos.files || []);
+        // Coletar fotos na ordem correta
+        const previews = document.querySelectorAll('.preview-item');
+        const existingPhotos = [];
+        const newFiles = Array.from(form.fotos.files || []);
 
-            // Primeiro, coletar URLs das fotos existentes na ordem atual
-            previews.forEach(preview => {
-                if (preview.dataset.existingPhoto === 'true') {
-                    existingPhotos.push(preview.dataset.photoUrl);
-                }
-            });
+        previews.forEach(preview => {
+            if (preview.dataset.existingPhoto === 'true') {
+                existingPhotos.push(preview.dataset.photoUrl);
+            }
+        });
 
-            // Depois, adicionar novas fotos na ordem atual
-            previews.forEach(preview => {
-                if (preview.dataset.existingPhoto !== 'true') {
-                    const fileName = preview.dataset.fileName;
-                    const file = newFiles.find(f => f.name === fileName);
-                    if (file) {
-                        formData.append('fotos', file);
-                    }
-                }
-            });
+        // Adicionar fotos existentes na ordem atual
+        formData.append('fotosExistentes', JSON.stringify(existingPhotos));
 
-            // Adicionar array de fotos existentes e suas posições
-            formData.append('fotosExistentes', JSON.stringify(existingPhotos));
+        // Adicionar novas fotos
+        newFiles.forEach(file => {
+            formData.append('fotos', file);
+        });
 
-            // Log para debug
-            console.log('Enviando fotos existentes:', existingPhotos);
-            console.log('Enviando novas fotos:', newFiles);
-
-            const url = vehicleId 
-                ? `/api/vehicles/${vehicleId}`
-                : '/api/vehicles';
-            
+        try {
+            const url = vehicleId ? `/api/vehicles/${vehicleId}` : '/api/vehicles';
             const method = vehicleId ? 'PUT' : 'POST';
             
             const response = await fetch(url, {
@@ -192,9 +191,6 @@ function setupForm() {
                 throw new Error('Erro ao salvar veículo');
             }
 
-            const result = await response.json();
-            console.log('Resposta do servidor:', result);
-
             // Fechar modal e recarregar lista
             const modal = document.getElementById('vehicle-modal');
             modal.style.display = 'none';
@@ -204,8 +200,8 @@ function setupForm() {
             
             alert(vehicleId ? 'Veículo atualizado com sucesso!' : 'Veículo cadastrado com sucesso!');
         } catch (error) {
-            console.error('Erro ao salvar veículo:', error);
-            alert('Erro ao salvar veículo. Por favor, tente novamente.');
+            console.error('Erro:', error);
+            alert('Erro ao salvar veículo');
         }
     }
 
@@ -416,7 +412,6 @@ async function editVehicle(id) {
 async function fillForm(vehicle) {
     const form = document.getElementById('vehicle-form');
     const previewArea = document.getElementById('upload-preview');
-    const uploadArea = document.getElementById('upload-area');
 
     // Preencher campos do formulário
     Object.keys(vehicle).forEach(key => {
@@ -433,13 +428,34 @@ async function fillForm(vehicle) {
     if (vehicle.fotos && Array.isArray(vehicle.fotos)) {
         const validPhotos = vehicle.fotos.filter(foto => foto && foto.trim() !== '');
         
-        // Debug
-        console.log('Total de fotos válidas:', validPhotos.length);
-        console.log('Fotos:', validPhotos);
-
-        // Criar previews para cada foto
         validPhotos.forEach((foto, index) => {
-            createPhotoPreview(foto, index, previewArea);
+            const preview = document.createElement('div');
+            preview.className = 'preview-item';
+            preview.draggable = true;
+            preview.dataset.index = index;
+            preview.dataset.existingPhoto = 'true';
+            preview.dataset.photoUrl = foto;
+            
+            preview.innerHTML = `
+                <div class="preview-order">${index + 1}</div>
+                <img src="${foto}" alt="Preview ${index + 1}">
+                <button type="button" class="remove-btn">&times;</button>
+            `;
+            
+            // Adicionar eventos de drag and drop
+            preview.addEventListener('dragstart', handleDragStart);
+            preview.addEventListener('dragend', handleDragEnd);
+            preview.addEventListener('dragover', handleDragOver);
+            preview.addEventListener('dragleave', handleDragLeave);
+            preview.addEventListener('drop', handleDrop);
+            
+            // Adicionar evento de remoção
+            preview.querySelector('.remove-btn').addEventListener('click', () => {
+                preview.remove();
+                updatePreviewOrder();
+            });
+            
+            previewArea.appendChild(preview);
         });
     }
 
@@ -448,40 +464,6 @@ async function fillForm(vehicle) {
     if (fotosInput) {
         fotosInput.value = '';
     }
-
-    // Reconfigurar área de upload
-    setupUploadArea(uploadArea, previewArea);
-}
-
-// Função auxiliar para criar preview de foto
-function createPhotoPreview(foto, index, container) {
-    const preview = document.createElement('div');
-    preview.className = 'preview-item';
-    preview.draggable = true;
-    preview.dataset.index = index;
-    preview.dataset.existingPhoto = 'true';
-    preview.dataset.photoUrl = foto;
-    
-    preview.innerHTML = `
-        <div class="preview-order">${index + 1}</div>
-        <img src="${foto}" 
-             alt="Preview ${index + 1}" 
-             onerror="this.src='/images/no-image.svg'"
-        >
-        <button type="button" class="remove-btn">&times;</button>
-    `;
-    
-    container.appendChild(preview);
-    
-    // Adicionar eventos
-    addDragListeners(preview);
-    
-    preview.querySelector('.remove-btn').addEventListener('click', () => {
-        preview.remove();
-        updatePreviewOrder();
-    });
-
-    return preview;
 }
 
 // Função para configurar área de upload
