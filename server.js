@@ -209,6 +209,10 @@ app.post('/api/login', (req, res) => {
         {
             username: 'luiz',
             senha: '976421Lp'
+        },
+        {
+            username: 'guilherme',
+            senha: '1406'
         }
     ];
 
