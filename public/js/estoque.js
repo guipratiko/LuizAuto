@@ -89,14 +89,14 @@ function normalizeImageUrl(url) {
         return url;
     }
     
-    // Se começar com /uploads, adiciona o domínio do servidor
+    // Se começar com /uploads, adiciona o IP do servidor
     if (url.startsWith('/uploads')) {
-        return `https://luizautomoveis.com${url}`;
+        return `http://167.172.139.129${url}`;
     }
     
     // Se começar com uploads (sem /), adiciona a barra
     if (url.startsWith('uploads/')) {
-        return `https://luizautomoveis.com/${url}`;
+        return `http://167.172.139.129/${url}`;
     }
     
     // Para outros casos, tenta construir a URL completa

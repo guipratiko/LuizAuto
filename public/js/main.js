@@ -49,52 +49,60 @@ function setupMenuToggle() {
     });
 }
 
-async function loadFeaturedVehicles() {
-    try {
-        // Busca os 9 veículos mais recentes usando sort por dataCadastro decrescente
-        const response = await fetch('/api/vehicles?limit=9&sort=-dataCadastro&status=disponivel');
-        if (!response.ok) throw new Error('Erro ao carregar veículos');
-        
-        const data = await response.json();
-        const vehicles = Array.isArray(data) ? data : data.vehicles;
-        
-        if (!vehicles || vehicles.length === 0) {
-            const grid = document.getElementById('vehicles-grid');
-            if (grid) {
-                grid.innerHTML = '<p class="no-vehicles">Nenhum veículo disponível no momento.</p>';
-            }
-            return;
-        }
-
-        // Pega apenas os 9 primeiros veículos (mais recentes)
-        const recentVehicles = vehicles.slice(0, 9);
-        displayVehicles(recentVehicles);
-    } catch (error) {
-        console.error('Erro ao carregar veículos:', error);
-        const grid = document.getElementById('vehicles-grid');
-        if (grid) {
-            grid.innerHTML = '<p class="error-message">Erro ao carregar veículos. Por favor, tente novamente mais tarde.</p>';
-        }
+// Função para normalizar URL da imagem
+function normalizeImageUrl(url) {
+    if (!url) return '/images/no-image.svg';
+    
+    // Se a URL já começar com http ou https, retorna ela mesma
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
     }
+    
+    // Se começar com /uploads, adiciona o IP do servidor
+    if (url.startsWith('/uploads')) {
+        return `http://167.172.139.129${url}`;
+    }
+    
+    // Se começar com uploads (sem /), adiciona a barra
+    if (url.startsWith('uploads/')) {
+        return `http://167.172.139.129/${url}`;
+    }
+    
+    // Para outros casos, tenta construir a URL completa
+    return url.startsWith('/') ? url : `/${url}`;
 }
 
-function displayVehicles(vehicles) {
-    const grid = document.getElementById('vehicles-grid');
-    if (!grid) return;
+// Atualizar a função que carrega os veículos em destaque
+async function loadFeaturedVehicles() {
+    try {
+        const response = await fetch('/api/vehicles?limit=9&sort=-dataCadastro');
+        const data = await response.json();
+        const vehicles = Array.isArray(data) ? data : data.vehicles || [];
 
-    grid.innerHTML = vehicles.map(vehicle => `
-        <div class="vehicle-card" onclick="showVehicleDetails('${vehicle._id}')">
-            <img src="${vehicle.fotos[0] || '/images/no-image.svg'}" alt="${vehicle.marca} ${vehicle.modelo}">
-            <div class="vehicle-info">
-                <h3>${vehicle.marca} ${vehicle.modelo}</h3>
-                <p class="price">R$ ${vehicle.preco.toLocaleString('pt-BR')}</p>
-                <div class="specs">
-                    <span><i class="fas fa-calendar"></i> ${vehicle.ano}</span>
-                    <span><i class="fas fa-tachometer-alt"></i> ${vehicle.quilometragem.toLocaleString('pt-BR')} km</span>
+        const grid = document.querySelector('.vehicles-grid');
+        if (!grid) return;
+
+        grid.innerHTML = vehicles.map(vehicle => `
+            <div class="vehicle-card" onclick="showVehicleDetails('${vehicle._id}')">
+                <img src="${normalizeImageUrl(vehicle.fotos?.[0])}" 
+                     alt="${vehicle.marca} ${vehicle.modelo}"
+                     class="vehicle-image"
+                     onerror="this.src='/images/no-image.svg'">
+                <div class="vehicle-info">
+                    <h3 class="vehicle-title">${vehicle.marca} ${vehicle.modelo}</h3>
+                    <p class="vehicle-price">R$ ${vehicle.preco?.toLocaleString('pt-BR')}</p>
+                    <div class="vehicle-details">
+                        <p><i class="fas fa-calendar"></i> ${vehicle.ano}</p>
+                        <p><i class="fas fa-tachometer-alt"></i> ${vehicle.quilometragem?.toLocaleString('pt-BR')} km</p>
+                        <p><i class="fas fa-gas-pump"></i> ${vehicle.combustivel}</p>
+                        <p><i class="fas fa-cog"></i> ${vehicle.transmissao}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    } catch (error) {
+        console.error('Erro ao carregar veículos em destaque:', error);
+    }
 }
 
 // Função para mostrar detalhes do veículo
