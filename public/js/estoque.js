@@ -89,18 +89,18 @@ function normalizeImageUrl(url) {
         return url;
     }
     
-    // Se começar com /uploads, adiciona o IP do servidor
-    if (url.startsWith('/uploads')) {
-        return `http://167.172.139.129${url}`;
+    // Se começar com /uploads, retorna a URL completa
+    if (url.startsWith('/uploads/')) {
+        return url;
     }
     
     // Se começar com uploads (sem /), adiciona a barra
     if (url.startsWith('uploads/')) {
-        return `http://167.172.139.129/${url}`;
+        return `/${url}`;
     }
     
-    // Para outros casos, tenta construir a URL completa
-    return url.startsWith('/') ? url : `/${url}`;
+    // Para outros casos, retorna a URL como está
+    return url;
 }
 
 // Carregar veículos com filtros
