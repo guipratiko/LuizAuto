@@ -117,17 +117,17 @@ async function showVehicleDetails(id) {
         document.getElementById('vehicle-title').textContent = `${vehicle.marca} ${vehicle.modelo} ${vehicle.ano}`;
         document.getElementById('vehicle-price').textContent = `R$ ${vehicle.preco.toLocaleString('pt-BR')}`;
         
-        // Configurar galeria de fotos
+        // Configurar galeria de fotos com URLs normalizadas
         if (vehicle.fotos && vehicle.fotos.length > 0) {
             const mainPhoto = document.getElementById('detail-main-photo');
-            mainPhoto.src = vehicle.fotos[0];
+            mainPhoto.src = normalizeImageUrl(vehicle.fotos[0]);
             mainPhoto.onerror = () => {
                 mainPhoto.src = '/images/no-image.svg';
             };
 
             document.getElementById('detail-thumbnails').innerHTML = vehicle.fotos.map((foto, index) => `
-                <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainPhoto('${foto}', this)">
-                    <img src="${foto}" alt="Foto ${index + 1}" onerror="this.src='/images/no-image.svg'">
+                <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainPhoto('${normalizeImageUrl(foto)}', this)">
+                    <img src="${normalizeImageUrl(foto)}" alt="Foto ${index + 1}" onerror="this.src='/images/no-image.svg'">
                 </div>
             `).join('');
         }
@@ -254,7 +254,7 @@ function changeMainPhoto(src, thumbnail) {
     const mainPhoto = document.getElementById('detail-main-photo');
     if (!mainPhoto) return;
 
-    mainPhoto.src = src;
+    mainPhoto.src = normalizeImageUrl(src);
     mainPhoto.onerror = () => {
         mainPhoto.src = '/images/no-image.svg';
     };
