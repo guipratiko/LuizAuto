@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    loadMarcasDisponiveis();
     loadCoresDisponiveis();
     setupFilters();
     loadVehicles();
@@ -32,30 +31,6 @@ async function loadCoresDisponiveis() {
     }
 }
 
-// Adicionar esta nova função
-async function loadMarcasDisponiveis() {
-    try {
-        const response = await fetch('/api/vehicles');
-        const data = await response.json();
-        const vehicles = Array.isArray(data) ? data : data.vehicles || [];
-
-        // Extrair marcas únicas dos veículos
-        const marcas = [...new Set(vehicles.map(v => v.marca))].filter(marca => marca);
-        marcas.sort(); // Ordenar marcas alfabeticamente
-
-        // Preencher select de marcas
-        const marcaSelect = document.getElementById('filter-marca');
-        if (marcaSelect) {
-            marcaSelect.innerHTML = `
-                <option value="">Todas as Marcas</option>
-                ${marcas.map(marca => `<option value="${marca}">${marca}</option>`).join('')}
-            `;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar marcas:', error);
-    }
-}
-
 // Configuração dos filtros
 function setupFilters() {
     // Preencher anos dinamicamente
@@ -78,39 +53,23 @@ function setupFilters() {
 }
 
 // Carregar veículos com filtros
-async function loadVehicles(page = 1) {
+async function loadVehicles() {
     try {
         const params = new URLSearchParams();
-        currentPage = page;
         
-        // Pegar valores dos filtros
-        const marca = document.getElementById('filter-marca').value;
-        const ano = document.getElementById('filter-ano').value;
-        const cor = document.getElementById('filter-cor').value;
-        const precoRange = document.getElementById('filter-preco').value;
+        // Adicionar filtros à query
+        const marca = document.getElementById('filter-marca')?.value;
+        const ano = document.getElementById('filter-ano')?.value;
+        const cor = document.getElementById('filter-cor')?.value;
+        const precoRange = document.getElementById('filter-preco')?.value;
 
-        // Adicionar filtros de forma simples
-        if (marca) {
-            params.append('marca', marca);
-        }
-        
-        if (ano) {
-            params.append('ano', ano);
-        }
-        
-        if (cor) {
-            params.append('cor', cor);
-        }
-
-        // Tratar faixa de preço
+        if (marca) params.append('marca', marca);
+        if (ano) params.append('ano', ano);
+        if (cor) params.append('cor', cor);
         if (precoRange) {
-            const [min, max] = precoRange.split('-');
-            if (min) {
-                params.append('precoMin', min);
-            }
-            if (max) {
-                params.append('precoMax', max);
-            }
+            const [min, max] = precoRange.split('-').map(Number);
+            if (min) params.append('precoMin', min);
+            if (max) params.append('precoMax', max);
         }
 
         // Garantir que o limite seja sempre 20
@@ -118,12 +77,15 @@ async function loadVehicles(page = 1) {
         params.set('page', currentPage);
         params.append('sort', '-dataCadastro');
 
+        // Fazer a requisição
         const response = await fetch(`/api/vehicles?${params.toString()}`);
         if (!response.ok) {
             throw new Error('Erro na requisição');
         }
 
         const data = await response.json();
+
+        // Filtrar os resultados no lado do cliente se necessário
         let filteredVehicles = Array.isArray(data) ? data : data.vehicles || [];
         
         // Aplicar filtros manualmente se necessário
@@ -150,10 +112,9 @@ async function loadVehicles(page = 1) {
             });
         }
 
-        // Garantir que a paginação use sempre 20 itens
-        const start = (currentPage - 1) * ITEMS_PER_PAGE;
-        const end = start + ITEMS_PER_PAGE;
-        const paginatedVehicles = filteredVehicles.slice(start, end);
+        // Paginação manual dos resultados filtrados
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const paginatedVehicles = filteredVehicles.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
         // Exibir resultados filtrados
         displayVehicles(paginatedVehicles);
