@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    loadMarcasDisponiveis();
     loadCoresDisponiveis();
     setupFilters();
     loadVehicles();
@@ -6,6 +7,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentPage = 1;
 const ITEMS_PER_PAGE = 20;
+
+// Função para carregar marcas disponíveis
+async function loadMarcasDisponiveis() {
+    try {
+        const response = await fetch('/api/vehicles');
+        const data = await response.json();
+        const vehicles = Array.isArray(data) ? data : data.vehicles || [];
+
+        // Extrair marcas únicas dos veículos
+        const marcas = [...new Set(vehicles.map(v => v.marca))].filter(marca => marca);
+        marcas.sort(); // Ordenar marcas alfabeticamente
+
+        // Debug
+        console.log('Marcas encontradas:', marcas);
+
+        // Preencher select de marcas
+        const marcaSelect = document.getElementById('filter-marca');
+        if (marcaSelect) {
+            marcaSelect.innerHTML = `
+                <option value="">Todas as Marcas</option>
+                ${marcas.map(marca => `<option value="${marca}">${marca}</option>`).join('')}
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar marcas:', error);
+    }
+}
 
 // Função para carregar cores disponíveis
 async function loadCoresDisponiveis() {
@@ -50,6 +78,29 @@ function setupFilters() {
             loadVehicles();
         });
     });
+}
+
+// Função para normalizar URL da imagem
+function normalizeImageUrl(url) {
+    if (!url) return '/images/no-image.svg';
+    
+    // Se a URL já começar com http ou https, retorna ela mesma
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+    
+    // Se começar com /uploads, adiciona o domínio do servidor
+    if (url.startsWith('/uploads')) {
+        return `https://luizautomoveis.com${url}`;
+    }
+    
+    // Se começar com uploads (sem /), adiciona a barra
+    if (url.startsWith('uploads/')) {
+        return `https://luizautomoveis.com/${url}`;
+    }
+    
+    // Para outros casos, tenta construir a URL completa
+    return url.startsWith('/') ? url : `/${url}`;
 }
 
 // Carregar veículos com filtros
@@ -144,9 +195,10 @@ function displayVehicles(vehicles) {
 
     grid.innerHTML = vehicles.map(vehicle => `
         <div class="vehicle-card" onclick="showVehicleDetails('${vehicle._id}')">
-            <img src="${vehicle.fotos?.[0] || '/images/no-image.svg'}" 
+            <img src="${normalizeImageUrl(vehicle.fotos?.[0])}" 
                  alt="${vehicle.marca} ${vehicle.modelo}" 
-                 class="vehicle-image">
+                 class="vehicle-image"
+                 onerror="this.src='/images/no-image.svg'">
             <div class="vehicle-info">
                 <h3 class="vehicle-title">${vehicle.marca} ${vehicle.modelo}</h3>
                 <p class="vehicle-price">R$ ${vehicle.preco?.toLocaleString('pt-BR')}</p>

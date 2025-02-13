@@ -29,6 +29,74 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <style>
+        .vehicles-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Telas grandes */
+        @media screen and (max-width: 1200px) {
+            .vehicles-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+
+        /* Tablets */
+        @media screen and (max-width: 992px) {
+            .vehicles-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+
+        /* Celulares */
+        @media screen and (max-width: 576px) {
+            .vehicles-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .vehicle-card img {
+                height: 140px;
+            }
+
+            .vehicle-info {
+                padding: 10px;
+            }
+
+            .vehicle-title {
+                font-size: 0.9rem;
+            }
+
+            .vehicle-price {
+                font-size: 1rem;
+            }
+
+            .vehicle-details p {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Celulares pequenos */
+        @media screen and (max-width: 400px) {
+            .vehicles-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 10px;
+            }
+
+            .vehicle-card img {
+                height: 180px;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header">

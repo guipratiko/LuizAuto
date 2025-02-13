@@ -35,6 +35,66 @@
             gap: 20px;
             padding: 20px;
         }
+
+        /* Telas grandes */
+        @media screen and (max-width: 1200px) {
+            .vehicles-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+
+        /* Tablets */
+        @media screen and (max-width: 992px) {
+            .vehicles-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+
+        /* Celulares */
+        @media screen and (max-width: 576px) {
+            .vehicles-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .vehicle-card img {
+                height: 140px;
+            }
+
+            .vehicle-info {
+                padding: 10px;
+            }
+
+            .vehicle-title {
+                font-size: 0.9rem;
+            }
+
+            .vehicle-price {
+                font-size: 1rem;
+            }
+
+            .vehicle-details p {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Celulares pequenos */
+        @media screen and (max-width: 400px) {
+            .vehicles-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 10px;
+            }
+
+            .vehicle-card img {
+                height: 180px;
+            }
+        }
     </style>
 </head>
 <body>
