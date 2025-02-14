@@ -16,6 +16,9 @@ let uploadedPhotos = [];
 // Mover estas funções para o escopo global
 let draggedItem = null;
 
+// Variável global para rastrear fotos
+let currentPhotos = [];
+
 function addDragListeners(preview) {
     preview.addEventListener('dragstart', handleDragStart);
     preview.addEventListener('dragend', handleDragEnd);
@@ -42,10 +45,27 @@ function handleDragOver(e) {
     const draggedIndex = children.indexOf(draggedItem);
     const dropIndex = children.indexOf(item);
 
+    // Evitar duplicação durante o reordenamento
+    if (draggedIndex === dropIndex) return;
+
+    // Armazenar a posição original antes de remover
+    const nextSibling = draggedItem.nextSibling;
+    draggedItem.remove();
+
+    // Inserir na nova posição
     if (draggedIndex < dropIndex) {
         item.parentNode.insertBefore(draggedItem, item.nextSibling);
     } else {
         item.parentNode.insertBefore(draggedItem, item);
+    }
+
+    // Se a inserção falhou, restaurar à posição original
+    if (!draggedItem.parentNode) {
+        if (nextSibling) {
+            container.insertBefore(draggedItem, nextSibling);
+        } else {
+            container.appendChild(draggedItem);
+        }
     }
 }
 
@@ -56,19 +76,66 @@ function handleDragLeave(e) {
 function handleDrop(e) {
     e.preventDefault();
     this.classList.remove('dragging');
+    
+    // Garantir que o item arrastado está na árvore DOM
+    const container = document.querySelector('.upload-preview');
+    if (draggedItem && !draggedItem.parentNode) {
+        container.appendChild(draggedItem);
+    }
+    
+    removeDuplicates();
     updatePreviewOrder();
+    updateFormPhotos();
 }
 
 function handleDragEnd(e) {
     this.classList.remove('dragging');
+    
+    // Garantir que o item arrastado está na árvore DOM
+    const container = document.querySelector('.upload-preview');
+    if (draggedItem && !draggedItem.parentNode) {
+        container.appendChild(draggedItem);
+    }
+    
+    removeDuplicates();
     updatePreviewOrder();
+    updateFormPhotos();
+}
+
+// Nova função para remover duplicatas
+function removeDuplicates() {
+    const container = document.querySelector('.upload-preview');
+    const items = Array.from(container.querySelectorAll('.preview-item'));
+    const seen = new Set();
+    
+    items.forEach(item => {
+        const url = item.dataset.photoUrl;
+        if (url) {
+            if (seen.has(url)) {
+                item.remove();
+            } else {
+                seen.add(url);
+            }
+        }
+    });
 }
 
 function updatePreviewOrder() {
-    const previews = document.querySelectorAll('.preview-item');
-    previews.forEach((preview, index) => {
-        preview.dataset.index = index;
-        preview.querySelector('.preview-order').textContent = index + 1;
+    const container = document.querySelector('.upload-preview');
+    const items = Array.from(container.querySelectorAll('.preview-item'));
+    
+    items.forEach((item, index) => {
+        item.dataset.index = index;
+        const orderElement = item.querySelector('.preview-order');
+        if (orderElement) {
+            orderElement.textContent = index + 1;
+        }
+    });
+    
+    // Debug: mostrar fotos atuais
+    console.log('Fotos após reordenação:');
+    items.forEach(item => {
+        console.log(`- Tipo: ${item.dataset.type}, URL: ${item.dataset.photoUrl}`);
     });
 }
 
@@ -149,33 +216,67 @@ function setupForm() {
         const vehicleId = form.dataset.vehicleId;
         const token = localStorage.getItem('token');
 
-        // Adicionar campos básicos
-        for (let field of form.elements) {
-            if (field.name && field.name !== 'fotos') {
-                formData.append(field.name, field.value);
-            }
-        }
-
-        // Coletar fotos na ordem correta
-        const previews = document.querySelectorAll('.preview-item');
-        const existingPhotos = [];
-        const newFiles = Array.from(form.fotos.files || []);
-
-        previews.forEach(preview => {
-            if (preview.dataset.existingPhoto === 'true') {
-                existingPhotos.push(preview.dataset.photoUrl);
-            }
-        });
-
-        // Adicionar fotos existentes na ordem atual
-        formData.append('fotosExistentes', JSON.stringify(existingPhotos));
-
-        // Adicionar novas fotos
-        newFiles.forEach(file => {
-            formData.append('fotos', file);
-        });
-
         try {
+            console.log('Iniciando envio do formulário...');
+            
+            // Adicionar campos básicos
+            for (let field of form.elements) {
+                if (field.name && field.name !== 'fotos' && field.name !== 'fotosExistentes') {
+                    formData.append(field.name, field.value);
+                }
+            }
+
+            // Coletar fotos existentes na ordem correta
+            const existingPhotos = Array.from(document.querySelectorAll('.preview-item[data-type="existing"]'))
+                .map(preview => preview.dataset.photoUrl)
+                .filter(Boolean);
+            
+            formData.append('fotosExistentes', JSON.stringify(existingPhotos));
+
+            // Adicionar novas fotos na ordem correta
+            const newPreviews = Array.from(document.querySelectorAll('.preview-item[data-type="new"]'));
+            for (const preview of newPreviews) {
+                const fileData = preview.dataset.fileData;
+                const fileName = preview.dataset.fileName;
+                const fileType = preview.dataset.fileType;
+                
+                if (fileData && fileName && fileType) {
+                    try {
+                        const byteString = atob(fileData.split(',')[1]);
+                        const ab = new ArrayBuffer(byteString.length);
+                        const ia = new Uint8Array(ab);
+                        for (let i = 0; i < byteString.length; i++) {
+                            ia[i] = byteString.charCodeAt(i);
+                        }
+                        const blob = new Blob([ab], { type: fileType });
+                        const file = new File([blob], fileName, { 
+                            type: fileType,
+                            lastModified: new Date().getTime()
+                        });
+                        formData.append('fotos', file);
+                    } catch (error) {
+                        console.error('Erro ao processar arquivo:', error);
+                    }
+                }
+            }
+
+            // Debug: mostrar dados do formulário
+            console.log('Dados sendo enviados:');
+            for (let [key, value] of formData.entries()) {
+                if (key === 'fotosExistentes') {
+                    try {
+                        console.log('fotosExistentes:', JSON.parse(value));
+                    } catch (e) {
+                        console.error('Erro ao fazer parse de fotosExistentes:', value);
+                    }
+                } else if (key === 'fotos') {
+                    console.log('fotos:', value.name);
+                } else {
+                    console.log(key, ':', value);
+                }
+            }
+
+            // Enviar requisição
             const url = vehicleId ? `/api/vehicles/${vehicleId}` : '/api/vehicles';
             const method = vehicleId ? 'PUT' : 'POST';
             
@@ -188,20 +289,24 @@ function setupForm() {
             });
 
             if (!response.ok) {
-                throw new Error('Erro ao salvar veículo');
+                const error = await response.json();
+                throw new Error(error.error || 'Erro ao salvar veículo');
             }
+
+            const result = await response.json();
+            console.log('Resposta do servidor:', result);
 
             // Fechar modal e recarregar lista
             const modal = document.getElementById('vehicle-modal');
             modal.style.display = 'none';
             modal.classList.remove('active');
             resetForm();
-            loadVehicles();
+            await loadVehicles();
             
             alert(vehicleId ? 'Veículo atualizado com sucesso!' : 'Veículo cadastrado com sucesso!');
         } catch (error) {
             console.error('Erro:', error);
-            alert('Erro ao salvar veículo');
+            alert(error.message || 'Erro ao salvar veículo');
         }
     }
 
@@ -349,9 +454,10 @@ function displayVehicles(vehicles) {
             ${vehicles.map(vehicle => `
                 <tr>
                     <td>
-                        <img src="${vehicle.fotos?.[0] || '/images/no-image.jpg'}" 
+                        <img src="${vehicle.fotos?.[0] || '/images/no-image.svg'}" 
                              alt="${vehicle.marca} ${vehicle.modelo}" 
                              class="vehicle-thumbnail"
+                             onerror="this.src='/images/no-image.svg'"
                              onclick="showVehicleDetails('${vehicle._id}')">
                     </td>
                     <td>${vehicle.marca} ${vehicle.modelo}</td>
@@ -376,42 +482,16 @@ function displayVehicles(vehicles) {
     `;
 }
 
-async function editVehicle(id) {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`/api/vehicles/${id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) throw new Error('Erro ao carregar veículo');
-
-        const vehicle = await response.json();
-        console.log('Dados do veículo recebidos:', vehicle); // Debug
-
-        // Garantir que vehicle.fotos seja um array
-        if (!Array.isArray(vehicle.fotos)) {
-            vehicle.fotos = vehicle.fotos ? [vehicle.fotos] : [];
-        }
-
-        fillForm(vehicle);
-        
-        const form = document.getElementById('vehicle-form');
-        form.dataset.vehicleId = vehicle._id;
-        
-        document.getElementById('modal-title').textContent = 'Editar Veículo';
-        document.getElementById('vehicle-modal').style.display = 'block';
-        document.getElementById('vehicle-modal').classList.add('active');
-    } catch (error) {
-        console.error('Erro ao carregar veículo:', error);
-        alert('Erro ao carregar dados do veículo');
-    }
-}
-
-async function fillForm(vehicle) {
+// Função para preencher o formulário com os dados do veículo
+function fillForm(vehicle) {
     const form = document.getElementById('vehicle-form');
     const previewArea = document.getElementById('upload-preview');
+    
+    console.log('Preenchendo formulário com dados:', vehicle);
+    
+    // Remover classe new-vehicle se for edição
+    form.classList.remove('new-vehicle');
+    form.dataset.vehicleId = vehicle._id;
 
     // Preencher campos do formulário
     Object.keys(vehicle).forEach(key => {
@@ -424,46 +504,302 @@ async function fillForm(vehicle) {
     // Limpar área de preview
     previewArea.innerHTML = '';
 
-    // Mostrar fotos existentes
-    if (vehicle.fotos && Array.isArray(vehicle.fotos)) {
-        const validPhotos = vehicle.fotos.filter(foto => foto && foto.trim() !== '');
-        
+    // Garantir que as fotos são válidas e não vazias
+    const validPhotos = Array.isArray(vehicle.fotos) ? vehicle.fotos.filter(foto => foto && foto.trim() !== '') : [];
+    console.log('Fotos válidas encontradas:', validPhotos);
+
+    // Criar previews para fotos existentes
+    if (validPhotos.length > 0) {
         validPhotos.forEach((foto, index) => {
-            const preview = document.createElement('div');
-            preview.className = 'preview-item';
-            preview.draggable = true;
-            preview.dataset.index = index;
-            preview.dataset.existingPhoto = 'true';
-            preview.dataset.photoUrl = foto;
-            
-            preview.innerHTML = `
-                <div class="preview-order">${index + 1}</div>
-                <img src="${foto}" alt="Preview ${index + 1}">
-                <button type="button" class="remove-btn">&times;</button>
-            `;
-            
-            // Adicionar eventos de drag and drop
-            preview.addEventListener('dragstart', handleDragStart);
-            preview.addEventListener('dragend', handleDragEnd);
-            preview.addEventListener('dragover', handleDragOver);
-            preview.addEventListener('dragleave', handleDragLeave);
-            preview.addEventListener('drop', handleDrop);
-            
-            // Adicionar evento de remoção
-            preview.querySelector('.remove-btn').addEventListener('click', () => {
-                preview.remove();
-                updatePreviewOrder();
-            });
-            
-            previewArea.appendChild(preview);
+            createPhotoPreview(foto, index, previewArea, true, foto);
         });
+        console.log('Previews criados para fotos:', validPhotos);
+    } else {
+        console.log('Nenhuma foto válida encontrada');
     }
+
+    // Atualizar campo oculto de fotos
+    updateFormPhotos();
 
     // Limpar input de arquivo
     const fotosInput = document.getElementById('fotos');
     if (fotosInput) {
         fotosInput.value = '';
     }
+
+    console.log('Formulário preenchido com sucesso');
+}
+
+// Função para editar veículo
+async function editVehicle(id) {
+    try {
+        const response = await fetch(`/api/vehicles/${id}`);
+        if (!response.ok) {
+            throw new Error('Erro ao carregar veículo');
+        }
+        
+        const vehicle = await response.json();
+        console.log('Dados do veículo recebidos:', vehicle);
+        
+        // Garantir que vehicle.fotos seja um array
+        if (!Array.isArray(vehicle.fotos)) {
+            vehicle.fotos = vehicle.fotos ? [vehicle.fotos] : [];
+        }
+        
+        // Preencher formulário
+        fillForm(vehicle);
+        
+        // Mostrar modal
+        const modal = document.getElementById('vehicle-modal');
+        const modalTitle = document.getElementById('modal-title');
+        if (modalTitle) modalTitle.textContent = 'Editar Veículo';
+        modal.style.display = 'block';
+        modal.classList.add('active');
+        
+        // Atualizar campo oculto de fotos
+        updateFormPhotos();
+        
+    } catch (error) {
+        console.error('Erro ao carregar veículo:', error);
+        alert('Erro ao carregar dados do veículo');
+    }
+}
+
+// Função para lidar com arquivos
+function handleFiles(files, previewArea) {
+    if (!files || !previewArea) return;
+    
+    // Verificar número total de fotos (existentes + novas)
+    const existingPhotos = document.querySelectorAll('.preview-item[data-type="existing"]').length;
+    const newPhotos = document.querySelectorAll('.preview-item[data-type="new"]').length;
+    const totalPhotos = existingPhotos + newPhotos + files.length;
+    
+    if (totalPhotos > 10) {
+        alert(`Limite de 10 fotos excedido. Você já tem ${existingPhotos + newPhotos} foto(s) e está tentando adicionar mais ${files.length}.`);
+        return;
+    }
+
+    // Pegar o índice atual
+    const startIndex = previewArea.children.length;
+
+    // Atualizar input de arquivo
+    const fotosInput = document.getElementById('fotos');
+    if (fotosInput) {
+        const newFileList = new DataTransfer();
+        // Manter arquivos existentes
+        if (fotosInput.files) {
+            Array.from(fotosInput.files).forEach(file => {
+                // Verificar se o arquivo já não existe
+                const existingPreview = document.querySelector(`.preview-item[data-file-name="${file.name}"]`);
+                if (!existingPreview) {
+                    newFileList.items.add(file);
+                }
+            });
+        }
+        // Adicionar novos arquivos
+        Array.from(files).forEach(file => {
+            // Verificar se o arquivo já não existe em qualquer preview
+            const existingPreview = document.querySelector(`.preview-item[data-file-name="${file.name}"]`) ||
+                                  document.querySelector(`.preview-item[data-photo-url*="${file.name}"]`);
+            if (!existingPreview && file.size <= 5 * 1024 * 1024 && file.type.startsWith('image/')) {
+                newFileList.items.add(file);
+            }
+        });
+        fotosInput.files = newFileList.files;
+    }
+
+    // Processar cada arquivo
+    Array.from(files).forEach((file, index) => {
+        // Verificar se o arquivo já existe em qualquer preview
+        const existingPreview = document.querySelector(`.preview-item[data-file-name="${file.name}"]`) ||
+                              document.querySelector(`.preview-item[data-photo-url*="${file.name}"]`);
+        if (existingPreview) {
+            console.log('Arquivo já existe:', file.name);
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+            alert(`Arquivo ${file.name} excede 5MB`);
+            return;
+        }
+
+        // Verificar se é uma imagem válida
+        if (!file.type.startsWith('image/')) {
+            alert(`Arquivo ${file.name} não é uma imagem válida`);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const currentIndex = startIndex + index;
+            const preview = createPhotoPreview(e.target.result, currentIndex, previewArea, false);
+            if (preview) {
+                preview.dataset.fileName = file.name;
+                preview.dataset.fileType = file.type;
+                preview.dataset.fileSize = file.size;
+                preview.dataset.fileData = e.target.result;
+                updatePreviewOrder();
+                updateFormPhotos();
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// Função para criar preview de foto
+function createPhotoPreview(src, index, previewArea, isExisting = false, photoUrl = '') {
+    console.log('Criando preview para:', { src, index, isExisting, photoUrl });
+    
+    // Verificar se já existe um preview com esta URL ou src
+    if (photoUrl) {
+        const existingPreview = Array.from(previewArea.children)
+            .find(child => child.dataset.photoUrl === photoUrl);
+        if (existingPreview) {
+            console.log('Preview já existe para:', photoUrl);
+            return null;
+        }
+    } else {
+        const existingPreview = Array.from(previewArea.children)
+            .find(child => child.dataset.src === src);
+        if (existingPreview) {
+            console.log('Preview já existe para src:', src);
+            return null;
+        }
+    }
+    
+    // Verificar limite total de fotos
+    const totalPhotos = previewArea.children.length;
+    if (totalPhotos >= 10) {
+        console.log('Limite de 10 fotos atingido');
+        return null;
+    }
+    
+    const preview = document.createElement('div');
+    preview.className = 'preview-item';
+    preview.draggable = true;
+    preview.dataset.index = index;
+    preview.dataset.photoUrl = isExisting ? photoUrl : '';
+    preview.dataset.type = isExisting ? 'existing' : 'new';
+    preview.dataset.src = src;
+    
+    preview.innerHTML = `
+        <div class="preview-order">${index + 1}</div>
+        <img src="${src}" alt="Preview ${index + 1}" 
+             onerror="this.src='/images/no-image.svg'">
+        <button type="button" class="remove-btn" title="Remover foto">&times;</button>
+    `;
+
+    addDragListeners(preview);
+    
+    preview.querySelector('.remove-btn').addEventListener('click', () => {
+        if (confirm('Tem certeza que deseja remover esta foto?')) {
+            console.log('Removendo foto:', preview.dataset.photoUrl || preview.dataset.fileName);
+            console.log('Tipo da foto:', preview.dataset.type);
+            preview.remove();
+            updatePreviewOrder();
+            updateFormPhotos();
+        }
+    });
+    
+    previewArea.appendChild(preview);
+    console.log('Preview criado:', preview.dataset);
+    return preview;
+}
+
+// Função para atualizar as fotos no formulário
+function updateFormPhotos() {
+    const form = document.getElementById('vehicle-form');
+    
+    // Coletar fotos na ordem correta
+    const allPreviews = Array.from(document.querySelectorAll('.preview-item'));
+    const existingPhotos = allPreviews
+        .filter(preview => preview.dataset.type === 'existing')
+        .map(preview => preview.dataset.photoUrl)
+        .filter(Boolean);
+
+    console.log('Atualizando campo de fotos com:', existingPhotos);
+
+    // Criar ou atualizar campo oculto para fotos existentes
+    let fotosExistentesInput = form.querySelector('input[name="fotosExistentes"]');
+    if (!fotosExistentesInput) {
+        fotosExistentesInput = document.createElement('input');
+        fotosExistentesInput.type = 'hidden';
+        fotosExistentesInput.name = 'fotosExistentes';
+        form.appendChild(fotosExistentesInput);
+    }
+    fotosExistentesInput.value = JSON.stringify(existingPhotos);
+    console.log('Campo fotosExistentes atualizado:', JSON.parse(fotosExistentesInput.value));
+
+    // Atualizar input de arquivo com a ordem correta
+    const fotosInput = document.getElementById('fotos');
+    if (fotosInput) {
+        const newFileList = new DataTransfer();
+        const newPreviews = allPreviews.filter(preview => preview.dataset.type === 'new');
+        
+        // Criar novos arquivos a partir dos dados armazenados
+        newPreviews.forEach(preview => {
+            const fileData = preview.dataset.fileData;
+            const fileName = preview.dataset.fileName;
+            const fileType = preview.dataset.fileType;
+            const fileSize = preview.dataset.fileSize;
+            
+            if (fileData && fileName && fileType) {
+                try {
+                    // Converter base64 para Blob
+                    const byteString = atob(fileData.split(',')[1]);
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    const blob = new Blob([ab], { type: fileType });
+                    
+                    // Criar arquivo
+                    const file = new File([blob], fileName, { 
+                        type: fileType,
+                        lastModified: new Date().getTime()
+                    });
+                    
+                    // Verificar se o arquivo já existe
+                    const exists = Array.from(newFileList.files)
+                        .some(f => f.name === fileName);
+                    
+                    if (!exists) {
+                        newFileList.items.add(file);
+                    }
+                } catch (error) {
+                    console.error('Erro ao processar arquivo:', error);
+                }
+            }
+        });
+        
+        fotosInput.files = newFileList.files;
+    }
+}
+
+// Função para obter todas as fotos
+function getAllPhotos() {
+    const previews = document.querySelectorAll('.preview-item');
+    const photos = Array.from(previews).map(preview => ({
+        url: preview.dataset.photoUrl,
+        type: preview.dataset.type
+    }));
+    return photos;
+}
+
+// Função para obter fotos existentes
+function getExistingPhotos() {
+    const previews = document.querySelectorAll('.preview-item[data-existing-photo="true"]');
+    const existingPhotos = [];
+
+    previews.forEach(preview => {
+        if (preview.isConnected && preview.dataset.photoUrl) {
+            existingPhotos.push(preview.dataset.photoUrl);
+        }
+    });
+
+    console.log('Fotos existentes coletadas:', existingPhotos);
+    return existingPhotos;
 }
 
 // Função para configurar área de upload
@@ -484,30 +820,6 @@ function setupUploadArea(uploadArea, previewArea) {
         uploadArea.classList.remove('dragover');
         const files = e.dataTransfer.files;
         handleFiles(files, previewArea);
-    });
-}
-
-// Função para lidar com arquivos
-function handleFiles(files, previewArea) {
-    if (!files || !previewArea) return;
-    
-    if (files.length > 10) {
-        alert('Máximo de 10 imagens permitidas');
-        return;
-    }
-
-    Array.from(files).forEach((file, index) => {
-        if (file.size > 20 * 1024 * 1024) {
-            alert(`Arquivo ${file.name} excede 20MB`);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const currentIndex = previewArea.children.length;
-            createPhotoPreview(e.target.result, currentIndex, previewArea);
-        };
-        reader.readAsDataURL(file);
     });
 }
 
@@ -563,13 +875,26 @@ async function deleteVehicle(id) {
     }
 }
 
+// Função para resetar o formulário
 function resetForm() {
     const form = document.getElementById('vehicle-form');
     const previewArea = document.getElementById('upload-preview');
     
+    // Adicionar classe new-vehicle para novo cadastro
+    form.classList.add('new-vehicle');
+    
+    // Resetar array global de fotos
+    currentPhotos = [];
+    
     if (form) {
         form.reset();
-        form.dataset.vehicleId = ''; // Limpar o ID do veículo
+        form.dataset.vehicleId = '';
+        
+        // Limpar campo oculto de fotos
+        let fotosExistentesInput = form.querySelector('input[name="fotosExistentes"]');
+        if (fotosExistentesInput) {
+            fotosExistentesInput.value = '[]';
+        }
     }
     if (previewArea) previewArea.innerHTML = '';
     selectedVehicle = null;
@@ -720,4 +1045,10 @@ function changeMainPhoto(src, thumbElement) {
     
     // Atualizar índice atual
     currentPhotoIndex = Array.from(thumbnails).indexOf(thumbElement);
+}
+
+// Função para obter fotos removidas
+function getRemovedPhotos() {
+    const stored = localStorage.getItem('removedPhotos');
+    return stored ? JSON.parse(stored) : [];
 } 

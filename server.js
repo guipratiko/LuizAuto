@@ -7,6 +7,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const Contato = require('./src/models/Contato');
 const compression = require('compression');
+const fs = require('fs').promises;
 
 const app = express();
 
@@ -266,6 +267,18 @@ app.post('/api/contatos', async (req, res) => {
         res.status(500).json({ 
             error: 'Erro ao processar sua mensagem. Por favor, tente novamente.' 
         });
+    }
+});
+
+// Modificar a rota do favicon
+app.get('/favicon.ico', async (req, res) => {
+    const faviconPath = path.join(__dirname, 'public', 'images', 'favicon.ico');
+    try {
+        await fs.access(faviconPath);
+        res.sendFile(faviconPath);
+    } catch (error) {
+        // Se o favicon não existir, enviar um status 204 (No Content)
+        res.status(204).end();
     }
 });
 

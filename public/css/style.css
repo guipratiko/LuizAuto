@@ -1911,4 +1911,13 @@ main {
         font-size: 1.2rem;
         min-width: 20px;
     }
+}
+
+.required-new {
+    color: red;
+    display: none;
+}
+
+.form-group.new-vehicle .required-new {
+    display: inline;
 } 

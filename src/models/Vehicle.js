@@ -37,11 +37,10 @@ const vehicleSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    descricao: {
-        type: String,
-        required: true
-    },
-    fotos: [String],
+    descricao: String,
+    fotos: [{
+        type: String
+    }],
     status: {
         type: String,
         enum: ['disponivel', 'vendido', 'reservado'],
@@ -53,4 +52,23 @@ const vehicleSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Vehicle', vehicleSchema); 
+// Middleware pre-save para garantir que fotos seja sempre um array
+vehicleSchema.pre('save', function(next) {
+    if (!Array.isArray(this.fotos)) {
+        this.fotos = this.fotos ? [this.fotos] : [];
+    }
+    next();
+});
+
+// Middleware pre-findOneAndUpdate para garantir que fotos seja sempre um array
+vehicleSchema.pre('findOneAndUpdate', function(next) {
+    const update = this.getUpdate();
+    if (update.fotos && !Array.isArray(update.fotos)) {
+        update.fotos = [update.fotos];
+    }
+    next();
+});
+
+const Vehicle = mongoose.model('Vehicle', vehicleSchema);
+
+module.exports = Vehicle; 
